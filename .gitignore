@@ -1,0 +1,10 @@
+*.log
+node_modules/
+dist/
+public/
+.deploy*/
+.deploy_git*/
+.idea
+.vscode/
+.history/
+workspace.code-workspace
