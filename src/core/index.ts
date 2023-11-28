@@ -1,5 +1,5 @@
 import * as types from "../types";
-import { createHistoryMonitoring, getCanvasID, getLocation } from "../utils";
+import { createHistoryMonitoring, getCanvasID, getLocation, getDomPerformance, listenResourceLoad } from "../utils";
 
 export default class Tracker {
   private options: types.Options
@@ -32,6 +32,9 @@ export default class Tracker {
       if (this.options.errorTracker) {
         this.errorReport()
       }
+      if (this.options.performanceTracker) {
+        this.performanceReport()
+      }
     } catch (e) {
       this.reportTracker({
         targetKey: "tracker",
@@ -56,6 +59,7 @@ export default class Tracker {
       domTracker: false,
       // 默认监听的dom事件
       domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
+      performanceTracker: false,
       extra: undefined,
       sdkVersion: types.TrackerConfig.version,
       log: true,
@@ -160,6 +164,35 @@ export default class Tracker {
           event: "promise",
           message: error
         })
+      })
+    })
+  }
+  // 性能监控上报
+  private performanceReport() {
+    window.addEventListener('load', () => {
+      const domPerformance = getDomPerformance();
+      // const resourcePerformance = getResourcePerformance();
+      const data = {
+        targetKey: 'performance',
+        event: 'load',
+        domPerformance,
+        // resourcePerformance
+      }
+      console.log(domPerformance)
+      this.reportTracker(data);
+      // load完后开启资源的持续监控，例如后续请求以及图片的懒加载
+      listenResourceLoad((entry) => {
+        const data = {
+          targetKey: 'resourceLoad',
+          event: 'load',
+          resource: {
+            name: entry.name,
+            duration: entry.duration,
+            type: entry.entryType
+          }
+        }
+        console.log(data)
+        this.reportTracker(data);
       })
     })
   }

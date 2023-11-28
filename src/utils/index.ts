@@ -60,3 +60,54 @@ export function getCanvasID(str: string = '#qx.chuckle,123456789<canvas>'): stri
   return generateHash(atob(b64));
 }
 
+// 获取dom加载性能指标
+export function getDomPerformance(): object {
+  const performanceData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+  return {
+    startTime: performanceData.startTime,
+    whiteScreen: performance.getEntriesByType('paint')[0].startTime, // 白屏时间
+    load: performanceData.loadEventEnd - performanceData.startTime, // 页面加载总耗时，此时触发完成了onload事件
+    dom: performanceData.domContentLoadedEventEnd - performanceData.responseEnd, // DOM解析耗时，页面请求完成后，到整个DOM解析完所用的时间
+    domComplete: performanceData.domComplete, // html文档完全解析完毕的时间节点
+    resource: performanceData.loadEventEnd - performanceData.domContentLoadedEventEnd, // 资源加载耗时
+    htmlLoad: performanceData.responseEnd - performanceData.startTime, // HTML加载完时间，指页面所有 HTML 加载完成（不包括页面渲染时间）
+    firstInteraction: performanceData.domInteractive - performanceData.startTime, // 首次交互时间
+    secureConnectionStart: performanceData.secureConnectionStart, // 浏览器与服务器开始安全链接的握手时间
+  }
+}
+
+// 获取已经加载完毕的资源的PerformanceResourceTiming
+export function getResourcePerformance(): PerformanceEntryList {
+  return performance.getEntriesByType("resource");
+}
+
+// 监听资源加载
+export function listenResourceLoad(callback: (arg0: PerformanceEntry) => void) {
+  const observer = new PerformanceObserver((list, _observer) => {
+    list.getEntries().forEach((entry) => {
+      const e = entry as PerformanceResourceTiming;
+      if (e.initiatorType !== "beacon") {
+        callback(e);
+      }
+    });
+  });
+  observer.observe({
+    entryTypes: ["resource"],
+  });
+}
+
+// 监视器
+export const watch = <T extends object>(params: T, fn: (target: T, p: string | symbol, newValue: any, receiver: any) => {}): T => {
+  return new Proxy(params, {
+    get(target, key, receiver): any {
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receiver): boolean {
+      // 监视的值发生改变后执行传入的函数
+      fn(target, key, value, receiver);
+      const result = Reflect.set(target, key, value, receiver);
+      return result;
+    }
+  })
+};
+

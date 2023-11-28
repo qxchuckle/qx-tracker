@@ -10,18 +10,29 @@ const config = {
   ]
 }
 
+const testJS = `
+const tk = new Tracker({
+  "requestUrl": 'http://127.0.0.1:9000/tracker',
+  "historyTracker": false,
+  "hashTracker": true,
+  "domTracker": true,
+  "errorTracker": true,
+  "performanceTracker": true,
+})
+setTimeout(() =>{
+  const imgElement = document.createElement('img');
+  imgElement.src = 'https://github.githubassets.com/assets/mona-loading-dimmed-5da225352fd7.gif';
+  imgElement.style.maxWidth = '100px';
+  document.body.appendChild(imgElement);
+},1000)
+`
+
 export const htmlDevTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
     const script = `<script type="module">
         import Tracker from './index.js';
-        const tk = new Tracker({
-          "requestUrl": 'http://127.0.0.1:9000/tracker',
-          "historyTracker": false,
-          "hashTracker": true,
-          "domTracker": true,
-          "errorTracker": true,
-        })
+        ${testJS}
     </script>`;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
@@ -32,13 +43,7 @@ export const htmlProdTemple = {
   template({ attributes, bundle, files, publicPath, title, meta }) {
     const script = `<script type="module">
         import Tracker from './index.esm.js';
-        const tk = new Tracker({
-          "requestUrl": 'http://127.0.0.1:9000/tracker',
-          "historyTracker": false,
-          "hashTracker": true,
-          "domTracker": true,
-          "errorTracker": true,
-        })
+        ${testJS}
     </script>`;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }

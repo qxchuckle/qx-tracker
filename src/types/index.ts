@@ -7,6 +7,7 @@ export interface DefaultOptions {
   errorTracker: boolean,
   domTracker: boolean,
   domEventsList: Set<keyof HTMLElementEventMap>,
+  performanceTracker: boolean,
   extra: Record<string, any> | undefined,
   sdkVersion: string | number,
   log: boolean,
