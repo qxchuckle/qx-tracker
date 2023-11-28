@@ -13,7 +13,16 @@ const config = {
 export const htmlDevTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const script = `<script type="module" src="${publicPath}index.js"></script>`;
+    const script = `<script type="module">
+        import Tracker from './index.js';
+        const tk = new Tracker({
+          "requestUrl": 'http://127.0.0.1:9000/tracker',
+          "historyTracker": false,
+          "hashTracker": true,
+          "domTracker": true,
+          "errorTracker": true,
+        })
+    </script>`;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }

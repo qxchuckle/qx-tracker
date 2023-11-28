@@ -197,12 +197,5 @@ export default class Tracker {
 }
 
 
-// 测试代码
-const tk = new Tracker({
-  "requestUrl": 'http://127.0.0.1:9000/tracker',
-  "historyTracker": false,
-  "hashTracker": true,
-  "domTracker": true,
-  "errorTracker": true,
-})
-tk;
+
+
