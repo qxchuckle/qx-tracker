@@ -168,10 +168,10 @@ export default class Tracker {
     })
   }
   // 性能监控上报
-  private performanceReport() {
+  private performanceReport(accuracy: number = 2) {
     window.addEventListener('load', () => {
-      const domPerformance = getDomPerformance();
-      const resourcePerformance = getResourcePerformance();
+      const domPerformance = getDomPerformance(accuracy);
+      const resourcePerformance = getResourcePerformance(accuracy);
       const data = {
         targetKey: 'performance',
         event: 'load',
@@ -187,7 +187,7 @@ export default class Tracker {
           event: 'load',
           resource: {
             name: entry.name,
-            duration: entry.duration,
+            duration: entry.duration.toFixed(accuracy),
             type: entry.entryType
           }
         }
