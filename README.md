@@ -34,7 +34,7 @@ interface DefaultOptions {
   hashTracker: boolean;
   errorTracker: boolean;
   domTracker: boolean;
-  domEventsList: Array<keyof HTMLElementEventMap>;
+  domEventsList: Set<keyof HTMLElementEventMap>;
   extra: Record<string, any> | undefined;
   sdkVersion: string | number;
   log: boolean;
