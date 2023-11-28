@@ -30,7 +30,16 @@ export const htmlDevTemple = {
 export const htmlProdTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const script = `<script src="${publicPath}index.js"></script>`;
+    const script = `<script type="module">
+        import Tracker from './index.esm.js';
+        const tk = new Tracker({
+          "requestUrl": 'http://127.0.0.1:9000/tracker',
+          "historyTracker": false,
+          "hashTracker": true,
+          "domTracker": true,
+          "errorTracker": true,
+        })
+    </script>`;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
