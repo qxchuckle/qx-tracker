@@ -30,7 +30,7 @@ export const htmlDevTemple = {
 export const htmlProdTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const script = `<script src="${publicPath}index.min.js"></script>`;
+    const script = `<script src="${publicPath}index.js"></script>`;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
