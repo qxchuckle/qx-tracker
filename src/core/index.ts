@@ -1,5 +1,5 @@
 import * as types from "../types";
-import { createHistoryMonitoring, getCanvasID, getLocation, getDomPerformance, listenResourceLoad } from "../utils";
+import { createHistoryMonitoring, getCanvasID, getLocation, getDomPerformance, getResourcePerformance, listenResourceLoad } from "../utils";
 
 export default class Tracker {
   private options: types.Options
@@ -171,14 +171,14 @@ export default class Tracker {
   private performanceReport() {
     window.addEventListener('load', () => {
       const domPerformance = getDomPerformance();
-      // const resourcePerformance = getResourcePerformance();
+      const resourcePerformance = getResourcePerformance();
       const data = {
         targetKey: 'performance',
         event: 'load',
         domPerformance,
-        // resourcePerformance
+        resourcePerformance
       }
-      console.log(domPerformance)
+      // console.log(data)
       this.reportTracker(data);
       // load完后开启资源的持续监控，例如后续请求以及图片的懒加载
       listenResourceLoad((entry) => {
@@ -191,7 +191,7 @@ export default class Tracker {
             type: entry.entryType
           }
         }
-        console.log(data)
+        // console.log(data)
         this.reportTracker(data);
       })
     })

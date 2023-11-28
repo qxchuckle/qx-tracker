@@ -6,8 +6,8 @@ app.use(express.urlencoded({
 }));
 
 app.post('/tracker', function (req, res) {
-  console.log(req.body);
-  console.log(JSON.parse(Object.keys(req.body)[0]));
+  // console.log(req.body);
+  console.log(JSON.parse(Object.keys(req.body)[0] + Object.values(req.body)[0]));
   res.send('ok');
 });
 

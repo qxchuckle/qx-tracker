@@ -60,6 +60,7 @@ function renderHtml(additionalBody, { attributes, bundle, files, publicPath, tit
       <h1>Test</h1>
       <button class="a b c" id="d" target-key="btn" target-events="['click']">dom事件上报测试</button>
       <div target-key="div" target-events="['mouseover', 'mouseout']" style="width:100px;height:100px;background-color:blue;"></div>
+      <img src="https://avatars.githubusercontent.com/u/55614189?v=4" width="100" />
       ${arrToString(additionalBody)}
     </body>
     </html>`;

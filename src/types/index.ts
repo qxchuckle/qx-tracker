@@ -21,4 +21,12 @@ export interface Options extends Partial<DefaultOptions> {
 export enum TrackerConfig {
   version = '1.0.0', // 版本
 }
+export type InitiatorTypeLiteral = {
+  [K in PerformanceResourceTiming["initiatorType"]]: Array<{
+    name: string;
+    duration: string | number, // 资源加载耗时
+    size: number, // 资源大小
+    protocol: string, // 资源所用协议
+  }>;
+};
 
