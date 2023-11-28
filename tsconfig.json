@@ -44,13 +44,9 @@
     "moduleResolution": "node", // 模块解析策略，ts默认用node的解析策略，即相对的方式导入
     "baseUrl": "./", // 解析非相对模块的基地址，默认是当前目录
     "paths": { // 路径映射，相对于baseUrl
-      // 如使用jq时不想使用默认版本，而需要手动指定版本，可进行如下配置
-      // "jquery": [
-      //   "node_modules/jquery/dist/jquery.min.js"
-      // ],
-      "@/*": [
-        "src/*"
-      ]
+      // "@/*": [
+      //   "src/*"
+      // ]
     },
     "rootDirs": [
       "src"

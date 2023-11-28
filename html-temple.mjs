@@ -13,31 +13,30 @@ const config = {
 export const htmlDevTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const link = `<link rel="stylesheet" href="${publicPath}index.css">`;
     const script = `<script type="module" src="${publicPath}index.js"></script>`;
-    return renderHtml([link], [script], { attributes, bundle, files, publicPath, title, meta });
+    return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
 
 export const htmlProdTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const link = `<link rel="stylesheet" href="${publicPath}index.css">`;
-    const requirejs = "https://requirejs.org/docs/release/2.3.6/minified/require.js";
-    const script = `<script src="${requirejs}" data-main="${publicPath}index.min.js"></script>`;
-    return renderHtml([link], [script], { attributes, bundle, files, publicPath, title, meta });
+    const script = `<script src="${publicPath}index.min.js"></script>`;
+    return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
 
-function renderHtml(additionalHead, additionalBody, { attributes, bundle, files, publicPath, title, meta }) {
+function renderHtml(additionalBody, { attributes, bundle, files, publicPath, title, meta }) {
   return `<!DOCTYPE html>
     <html${renderAttributes(attributes)}>
     <head>
       ${renderMeta(meta)}
       <title>${title}</title>
-      ${arrToString(additionalHead)}
     </head>
     <body>
+      <h1>Test</h1>
+      <button class="a b c" id="d" target-key="btn" target-events="['click']">dom事件上报测试</button>
+      <div target-key="div" target-events="['mouseover', 'mouseout']" style="width:100px;height:100px;background-color:blue;"></div>
       ${arrToString(additionalBody)}
     </body>
     </html>`;
