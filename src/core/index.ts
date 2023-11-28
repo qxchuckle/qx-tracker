@@ -23,6 +23,9 @@ export default class Tracker {
       if (this.options.hashTracker) {
         this.hashChangeReport()
       }
+      if (this.options.historyTracker || this.options.hashTracker) {
+        this.beforeCloseReport()
+      }
       if (this.options.domTracker) {
         this.domEventReport()
       }
@@ -64,23 +67,34 @@ export default class Tracker {
     this.location = getLocation();
   }
   // 进行location监听
-  private captureLocationEvents<T>(eventsList: string[], targetKey: string, data?: T) {
-    eventsList.forEach(event => {
-      window.addEventListener(event, () => {
-        const d = {
-          event, // 事件类型
-          targetKey, // 目标key，按后端需要自定义
-          location: this.location,
-          targetLocation: getLocation(),
-          // 用户访问该路由时长
-          duration: new Date().getTime() - this.enterTime,
-          data, // 额外的数据
-        }
-        // console.log(d);
-        this.reportTracker(d);
-        this.reLocationRecord();
-      })
+  private captureLocationEvent<T>(event: string, targetKey: string, data?: T) {
+    window.addEventListener(event, () => {
+      const d = {
+        event, // 事件类型
+        targetKey, // 目标key，按后端需要自定义
+        location: this.location,
+        targetLocation: getLocation(),
+        // 用户访问该路由时长
+        duration: new Date().getTime() - this.enterTime,
+        data, // 额外的数据
+      }
+      // console.log(d);
+      this.reportTracker(d);
+      this.reLocationRecord();
     })
+  }
+  // 监听history变化
+  private historyChangeReport(eventName: string = 'historyChange') {
+    // 创建History统一事件
+    createHistoryMonitoring(eventName);
+    this.captureLocationEvent(eventName, 'history-pv');
+  }
+  // 监听hash变化
+  private hashChangeReport() {
+    this.captureLocationEvent('hashchange', 'hash-pv')
+  }
+  // 页面关闭前上报
+  private beforeCloseReport() {
     // 在页面关闭前上报数据
     window.addEventListener("beforeunload", () => {
       const d = {
@@ -88,20 +102,9 @@ export default class Tracker {
         targetKey: 'close',
         location: this.location,
         duration: new Date().getTime() - this.enterTime,
-        data,
       }
       this.reportTracker(d);
     });
-  }
-  // 监听history变化
-  private historyChangeReport(eventName: string = 'historyChange') {
-    // 创建History统一事件
-    createHistoryMonitoring(eventName);
-    this.captureLocationEvents([eventName], 'history-pv')
-  }
-  // 监听hash变化
-  private hashChangeReport() {
-    this.captureLocationEvents(['hashchange'], 'hash-pv')
   }
   // 监听dom事件，并上报相关数据
   private domEventReport<T>(data?: T) {

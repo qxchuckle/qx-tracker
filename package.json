@@ -1,16 +1,22 @@
 {
   "name": "qx-tracker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "browser": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup --config rollup.config.prod.mjs",
-    "dev": "rollup --config rollup.config.dev.mjs -w -m "
+    "dev": "rollup --config rollup.config.dev.mjs -w -m"
   },
   "author": "qxchuckle",
-  "keywords": ["tracker","front-end","前端","埋点"],
+  "keywords": [
+    "tracker",
+    "front-end",
+    "前端",
+    "埋点"
+  ],
   "files": [
     "dist"
   ],
