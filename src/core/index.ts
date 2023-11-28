@@ -11,7 +11,7 @@ export default class Tracker {
     // 合并默认和用户传入设置，用户传入设置优先级高
     this.options = Object.assign(this.initDefault(), options);
     this.enterTime = new Date().getTime();
-    this.location = window.location.pathname + window.location.hash;
+    this.location = getLocation();
     this.init();
   }
   // 初始化设置，并且初始化监听事件
