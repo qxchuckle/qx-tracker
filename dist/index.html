@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="keywords" content="rollup, demo">
+      <title>Rollup Demo</title>
+    </head>
+    <body>
+      <h1>Test</h1>
+      <button class="a b c" id="d" target-key="btn" target-events="['click']">dom事件上报测试</button>
+      <div target-key="div" target-events="['mouseover', 'mouseout']" style="width:100px;height:100px;background-color:blue;"></div>
+      <img src="https://avatars.githubusercontent.com/u/55614189?v=4" width="100" />
+      <script type="module">
+        import Tracker from './index.esm.js';
+        
+const tk = new Tracker({
+  "requestUrl": 'http://127.0.0.1:9000/tracker',
+  "historyTracker": false,
+  "hashTracker": true,
+  "domTracker": true,
+  "errorTracker": true,
+  "performanceTracker": true,
+})
+setTimeout(() =>{
+  const imgElement = document.createElement('img');
+  imgElement.src = 'https://github.githubassets.com/assets/mona-loading-dimmed-5da225352fd7.gif';
+  imgElement.style.maxWidth = '100px';
+  document.body.appendChild(imgElement);
+},1000)
+
+    </script>
+    </body>
+    </html>>
+    </body>
+    </html>
