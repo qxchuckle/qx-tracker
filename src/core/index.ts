@@ -55,7 +55,7 @@ export default class Tracker {
       errorTracker: false,
       domTracker: false,
       // 默认监听的dom事件
-      domEventsList: ['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover'],
+      domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
       extra: undefined,
       sdkVersion: types.TrackerConfig.version,
       log: true,
