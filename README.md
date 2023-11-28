@@ -1,5 +1,5 @@
 # Tracker
-这是一个埋点SDK，你可以简单地使用它，为你的web应用收集数据信息
+这是一个前端监控和埋点SDK，你可以简单地使用它，为你的web应用收集数据信息
 
 使用方法：
 
@@ -12,17 +12,20 @@ const tracker = new Tracker({
 ```
 
 ## 配置
-你还需要手动启用需要上报的数据：
+你还需要手动启用需要的功能
+
+考虑到需求不同，防止数据混乱，所有监控功能都默认关闭，要按需启用
 
 ```ts
 /**
- * @uuid 唯一表示用户ID
+ * @uuid 唯一表示用户ID，默认通过canvas指纹生成8位uuid
  * @requestUrl 数据上报API
  * @historyTracker history模式
  * @hashTracker hash模式
  * @errorTracker error事件上报(js、promise等)
  * @domTracker 上报dom事件，需要给被监听元素加上target-key标识
  * @domEventsList 需要监听的dom事件，target-events属性给元素单独指定
+ * @performanceTracker 性能监控，页面加载，资源加载等
  * @extra 需要携带的额外数据
  * @sdkVersion sdk版本
  * @log 控制台输出信息
@@ -35,6 +38,7 @@ interface DefaultOptions {
   errorTracker: boolean;
   domTracker: boolean;
   domEventsList: Set<keyof HTMLElementEventMap>;
+  performanceTracker: boolean;
   extra: Record<string, any> | undefined;
   sdkVersion: string | number;
   log: boolean;
@@ -65,8 +69,8 @@ app.use(express.urlencoded({
 }));
 
 app.post('/tracker', function (req, res) {
-  console.log(req.body);
-  console.log(JSON.parse(Object.keys(req.body)[0]));
+  // console.log(req.body);
+  console.log(JSON.parse(Object.keys(req.body)[0] + Object.values(req.body)[0]));
   res.send('ok');
 });
 
@@ -102,7 +106,7 @@ app.listen(9000, () => {
     innerText: 'dom事件上报测试'
   }
 }
-// error监听上报
+// error监听
 {
   uuid: '6d6a0e19',
   time: 1701161928556,
@@ -110,6 +114,39 @@ app.listen(9000, () => {
   targetKey: 'message',
   event: 'error',
   message: 'Uncaught ReferenceError: abc is not defined'
+}
+// 性能监听
+{
+  uuid: '6d6a0e19',
+  time: 1701182609591,
+  location: '/',
+  targetKey: 'performance',
+  event: 'load',
+  domPerformance: {
+    startTime: '0.00',
+    whiteScreen: '345.30',
+    load: '0.00',
+    dom: '294.80',
+    domComplete: '433.20',
+    resource: '-332.80',
+    htmlLoad: '38.00',
+    firstInteraction: '317.90',
+    secureConnectionStart: '0.00'
+  },
+  resourcePerformance: { img: [ [Object] ], js: [ [Object] ], script: [ [Object] ] }
+}
+// 请求和资源监听
+{
+  uuid: '6d6a0e19',
+  time: 1701182611866,
+  location: '/',
+  targetKey: 'resourceLoad',
+  event: 'load',
+  resource: {
+    name: 'https://github.githubassets.com/assets/mona-loading-dimmed-5da225352fd7.gif',
+    duration: 3.600000023841858,
+    type: 'resource'
+  }
 }
 ```
 
