@@ -102,7 +102,7 @@ export function getResourcePerformance(accuracy: number = 2): InitiatorTypeLiter
     resources[key].push({
       name: i.name, // 资源的名称
       duration: i.duration.toFixed(accuracy), // 资源加载耗时
-      size: i.transferSize, // 资源大小
+      size: i.transferSize.toFixed(accuracy), // 资源大小
       protocol: i.nextHopProtocol, // 资源所用协议
     })
   })
