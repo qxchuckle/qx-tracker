@@ -11,6 +11,11 @@ export interface DefaultOptions {
   extra: Record<string, any> | undefined,
   sdkVersion: string | number,
   log: boolean,
+  realTime: boolean,
+  maxSize: number,
+}
+export type Report = {
+  [x in string]: any[]
 }
 // 用户传入选项
 export interface Options extends Partial<DefaultOptions> {

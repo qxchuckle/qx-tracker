@@ -137,6 +137,7 @@ function urlHandle(url, type) {
 class Tracker {
     options;
     enterTime;
+    report = {};
     location;
     constructor(options) {
         this.options = Object.assign(this.initDefault(), options);
@@ -153,7 +154,7 @@ class Tracker {
                 this.hashChangeReport();
             }
             if (this.options.historyTracker || this.options.hashTracker) {
-                this.beforeCloseReport();
+                this.beforeCloseRouterReport();
             }
             if (this.options.domTracker) {
                 this.domEventReport();
@@ -164,12 +165,15 @@ class Tracker {
             if (this.options.performanceTracker) {
                 this.performanceReport();
             }
+            if (!this.options.realTime) {
+                this.beforeCloseReport();
+            }
         }
         catch (e) {
             this.reportTracker({
                 targetKey: "tracker",
                 message: "Tracker is error"
-            });
+            }, 'error');
             if (this.options.log) {
                 console.error('Tracker is error');
             }
@@ -191,6 +195,8 @@ class Tracker {
             extra: undefined,
             sdkVersion: TrackerConfig.version,
             log: true,
+            realTime: false,
+            maxSize: 20000
         };
     }
     reLocationRecord() {
@@ -207,7 +213,7 @@ class Tracker {
                 duration: new Date().getTime() - this.enterTime,
                 data,
             };
-            this.reportTracker(d);
+            this.reportTracker(d, 'router');
             this.reLocationRecord();
         });
     }
@@ -218,7 +224,10 @@ class Tracker {
     hashChangeReport() {
         this.captureLocationEvent('hashchange', 'hash-pv');
     }
-    beforeCloseReport() {
+    beforeCloseRouterReport() {
+        if (!this.options.realTime) {
+            return;
+        }
         window.addEventListener("beforeunload", () => {
             const d = {
                 event: 'beforeunload',
@@ -226,7 +235,7 @@ class Tracker {
                 location: this.location,
                 duration: new Date().getTime() - this.enterTime,
             };
-            this.reportTracker(d);
+            this.reportTracker(d, 'router');
         });
     }
     domEventReport(data) {
@@ -249,7 +258,7 @@ class Tracker {
                             innerText: target.innerText,
                         },
                         data,
-                    });
+                    }, 'dom');
                 }
             });
         });
@@ -264,7 +273,7 @@ class Tracker {
                 targetKey: 'message',
                 event: 'error',
                 message: e.message
-            });
+            }, 'error');
         }, true);
     }
     promiseReject() {
@@ -274,7 +283,7 @@ class Tracker {
                     targetKey: "reject",
                     event: "promise",
                     message: error
-                });
+                }, 'error');
             });
         });
     }
@@ -288,7 +297,7 @@ class Tracker {
                 domPerformance,
                 resourcePerformance
             };
-            this.reportTracker(data);
+            this.reportTracker(data, 'performance');
             listenResourceLoad((entry) => {
                 const data = {
                     targetKey: 'resourceLoad',
@@ -299,22 +308,47 @@ class Tracker {
                         type: entry.entryType
                     }
                 };
-                this.reportTracker(data);
+                this.reportTracker(data, 'performance');
             });
         });
     }
-    reportTracker(data) {
-        const params = Object.assign({}, {
+    decorateData(data) {
+        return Object.assign({}, {
             uuid: this.options.uuid,
             time: new Date().getTime(),
             location: this.location,
             extra: this.options.extra,
         }, data);
-        const headers = {
+    }
+    sendBeacon(params) {
+        if (Object.keys(params).length <= 0) {
+            return false;
+        }
+        const blob = new Blob([JSON.stringify(params)], {
             type: 'application/x-www-form-urlencoded'
-        };
-        const blob = new Blob([JSON.stringify(params)], headers);
-        navigator.sendBeacon(this.options.requestUrl, blob);
+        });
+        const state = navigator.sendBeacon(this.options.requestUrl, blob);
+        return state;
+    }
+    reportTracker(data, key) {
+        const params = this.decorateData(data);
+        if (this.options.realTime) {
+            return this.sendBeacon(params);
+        }
+        else {
+            if (this.options.maxSize && JSON.stringify(this.report).length * 2 > (this.options.maxSize || 10000)) {
+                this.sendReport();
+            }
+            console.log(JSON.stringify(this.report).length * 2);
+            !this.report.hasOwnProperty(key) && (this.report[key] = []);
+            this.report[key].push(params);
+            return true;
+        }
+    }
+    beforeCloseReport() {
+        window.addEventListener("beforeunload", () => {
+            this.sendReport();
+        });
     }
     setUserID(uuid) {
         this.options.uuid = uuid;
@@ -330,7 +364,12 @@ class Tracker {
             event: 'manual',
             targetKey,
             data,
-        });
+        }, 'manual');
+    }
+    sendReport() {
+        const state = this.sendBeacon(this.report);
+        state && (this.report = {});
+        return state;
     }
 }
 

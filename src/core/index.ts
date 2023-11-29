@@ -3,10 +3,10 @@ import { createHistoryMonitoring, getCanvasID, getLocation, getDomPerformance, g
 
 export default class Tracker {
   private options: types.Options
-  // 记录用户进入当前页面时的时间戳
-  private enterTime: number
-  // 记录用户当前页面
-  private location: string
+  private enterTime: number   // 记录用户进入当前页面时的时间戳
+  private report: types.Report = {} // 暂存数据
+  private location: string // 记录用户当前页面
+
   constructor(options: types.Options) {
     // 合并默认和用户传入设置，用户传入设置优先级高
     this.options = Object.assign(this.initDefault(), options);
@@ -24,7 +24,7 @@ export default class Tracker {
         this.hashChangeReport()
       }
       if (this.options.historyTracker || this.options.hashTracker) {
-        this.beforeCloseReport()
+        this.beforeCloseRouterReport()
       }
       if (this.options.domTracker) {
         this.domEventReport()
@@ -35,11 +35,14 @@ export default class Tracker {
       if (this.options.performanceTracker) {
         this.performanceReport()
       }
+      if (!this.options.realTime) {
+        this.beforeCloseReport()
+      }
     } catch (e) {
       this.reportTracker({
         targetKey: "tracker",
         message: "Tracker is error"
-      })
+      }, 'error')
       if (this.options.log) {
         console.error('Tracker is error');
       }
@@ -57,12 +60,13 @@ export default class Tracker {
       hashTracker: false,
       errorTracker: false,
       domTracker: false,
-      // 默认监听的dom事件
       domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
       performanceTracker: false,
       extra: undefined,
       sdkVersion: types.TrackerConfig.version,
       log: true,
+      realTime: false,
+      maxSize: 20000
     }
   }
   // 更新当前路径和进入时间
@@ -83,7 +87,7 @@ export default class Tracker {
         data, // 额外的数据
       }
       // console.log(d);
-      this.reportTracker(d);
+      this.reportTracker(d, 'router');
       this.reLocationRecord();
     })
   }
@@ -98,7 +102,10 @@ export default class Tracker {
     this.captureLocationEvent('hashchange', 'hash-pv')
   }
   // 页面关闭前上报
-  private beforeCloseReport() {
+  private beforeCloseRouterReport() {
+    if (!this.options.realTime) {
+      return;
+    }
     // 在页面关闭前上报数据
     window.addEventListener("beforeunload", () => {
       const d = {
@@ -107,7 +114,7 @@ export default class Tracker {
         location: this.location,
         duration: new Date().getTime() - this.enterTime,
       }
-      this.reportTracker(d);
+      this.reportTracker(d, 'router');
     });
   }
   // 监听dom事件，并上报相关数据
@@ -136,7 +143,7 @@ export default class Tracker {
               innerText: target.innerText,
             },
             data,
-          })
+          }, 'dom')
         }
       })
     })
@@ -152,7 +159,7 @@ export default class Tracker {
         targetKey: 'message',
         event: 'error',
         message: e.message
-      })
+      }, 'error')
     }, true)
   }
   //捕获promise 错误
@@ -163,7 +170,7 @@ export default class Tracker {
           targetKey: "reject",
           event: "promise",
           message: error
-        })
+        }, 'error')
       })
     })
   }
@@ -179,7 +186,7 @@ export default class Tracker {
         resourcePerformance
       }
       // console.log(data)
-      this.reportTracker(data);
+      this.reportTracker(data, 'performance');
       // load完后开启资源的持续监控，例如后续请求以及图片的懒加载
       listenResourceLoad((entry) => {
         const data = {
@@ -192,23 +199,48 @@ export default class Tracker {
           }
         }
         // console.log(data)
-        this.reportTracker(data);
+        this.reportTracker(data, 'performance');
       })
     })
   }
-  // 上报
-  private reportTracker<T>(data: T) {
-    const params = Object.assign({}, {
+  // 修饰数据，加上统一信息
+  private decorateData<T>(data: T) {
+    return Object.assign({}, {
       uuid: this.options.uuid,
       time: new Date().getTime(),
       location: this.location,
       extra: this.options.extra,
     }, data);
-    const headers = {
-      type: 'application/x-www-form-urlencoded'
+  }
+  private sendBeacon(params: object): boolean {
+    if (Object.keys(params).length <= 0) {
+      return false;
     }
-    const blob = new Blob([JSON.stringify(params)], headers);
-    navigator.sendBeacon(this.options.requestUrl, blob)
+    const blob = new Blob([JSON.stringify(params)], {
+      type: 'application/x-www-form-urlencoded'
+    });
+    const state = navigator.sendBeacon(this.options.requestUrl, blob);
+    return state;
+  }
+  // 上报
+  private reportTracker<T>(data: T, key: string): boolean {
+    const params = this.decorateData(data);
+    if (this.options.realTime) {
+      return this.sendBeacon(params);
+    } else {
+      if (this.options.maxSize && JSON.stringify(this.report).length * 2 > (this.options.maxSize || 10000)) {
+        this.sendReport();
+      }
+      console.log(JSON.stringify(this.report).length * 2);
+      !this.report.hasOwnProperty(key) && (this.report[key] = []);
+      this.report[key].push(params);
+      return true;
+    }
+  }
+  private beforeCloseReport() {
+    window.addEventListener("beforeunload", () => {
+      this.sendReport();
+    });
   }
   // 允许外部设置uuid
   public setUserID<T extends types.DefaultOptions['uuid']>(uuid: T) {
@@ -228,10 +260,14 @@ export default class Tracker {
       event: 'manual',
       targetKey,
       data,
-    })
+    }, 'manual')
+  }
+  // 手动发送非实时上报模式下累积的数据，用户可以在合适的时候上报数据
+  public sendReport(): boolean {
+    const state = this.sendBeacon(this.report);
+    state && (this.report = {});
+    return state
   }
 }
-
-
 
 

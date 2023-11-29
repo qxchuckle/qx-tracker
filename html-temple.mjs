@@ -71,7 +71,12 @@ function arrToString(arr) {
 }
 
 function renderAttributes(attributes) {
-  return Object.entries(attributes).reduce((prev, [key, value]) => prev + ` ${key}="${value}"`, '')
+  return Object.entries(attributes).reduce((prev, [key, value]) => {
+    if (key === 'script') {
+      return prev
+    }
+    return prev + ` ${key}="${value}"`
+  }, '')
 }
 
 function renderMeta(meta) {

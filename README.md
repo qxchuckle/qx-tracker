@@ -28,7 +28,9 @@ const tracker = new Tracker({
  * @performanceTracker 性能监控，页面加载，资源加载等
  * @extra 需要携带的额外数据
  * @sdkVersion sdk版本
- * @log 控制台输出信息
+ * @log 控制台输出信息，
+ * @realTime 是否实时上报
+ * @maxSize 报告数据最大缓存量，超过该值则会自动上报
  */
 interface DefaultOptions {
   uuid: string | undefined;
@@ -42,9 +44,29 @@ interface DefaultOptions {
   extra: Record<string, any> | undefined;
   sdkVersion: string | number;
   log: boolean;
+  realTime: boolean,
+  maxSize: number
 }
 interface Options extends Partial<DefaultOptions> {
   requestUrl: string;
+}
+// 默认值：
+private initDefault(): types.DefaultOptions {
+  return <types.DefaultOptions>{
+    uuid: this.generateUserID(),
+    requestUrl: undefined,
+    historyTracker: false,
+    hashTracker: false,
+    errorTracker: false,
+    domTracker: false,
+    domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
+    performanceTracker: false,
+    extra: undefined,
+    sdkVersion: types.TrackerConfig.version,
+    log: true,
+    realTime: false,
+    maxSize: 20000
+  }
 }
 ```
 
@@ -133,7 +155,11 @@ app.listen(9000, () => {
     firstInteraction: '317.90',
     secureConnectionStart: '0.00'
   },
-  resourcePerformance: { img: [ [Object] ], js: [ [Object] ], script: [ [Object] ] }
+  resourcePerformance: { 
+    img: [ [Object] ], 
+    js: [ [Object] ], 
+    script: [ [Object] ] 
+  }
 }
 // 请求和资源监听
 {
