@@ -65,7 +65,7 @@ private initDefault(): types.DefaultOptions {
     sdkVersion: types.TrackerConfig.version,
     log: true,
     realTime: false,
-    maxSize: 20000
+    maxSize: 1024 * 50
   }
 }
 ```

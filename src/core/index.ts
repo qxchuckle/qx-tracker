@@ -66,7 +66,7 @@ export default class Tracker {
       sdkVersion: types.TrackerConfig.version,
       log: true,
       realTime: false,
-      maxSize: 20000
+      maxSize: 1024 * 50
     }
   }
   // 更新当前路径和进入时间
@@ -231,7 +231,7 @@ export default class Tracker {
       if (this.options.maxSize && JSON.stringify(this.report).length * 2 > (this.options.maxSize || 10000)) {
         this.sendReport();
       }
-      console.log(JSON.stringify(this.report).length * 2);
+      // console.log(JSON.stringify(this.report).length * 2);
       !this.report.hasOwnProperty(key) && (this.report[key] = []);
       this.report[key].push(params);
       return true;

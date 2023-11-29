@@ -196,7 +196,7 @@ class Tracker {
             sdkVersion: TrackerConfig.version,
             log: true,
             realTime: false,
-            maxSize: 20000
+            maxSize: 1024 * 50
         };
     }
     reLocationRecord() {
@@ -339,7 +339,6 @@ class Tracker {
             if (this.options.maxSize && JSON.stringify(this.report).length * 2 > (this.options.maxSize || 10000)) {
                 this.sendReport();
             }
-            console.log(JSON.stringify(this.report).length * 2);
             !this.report.hasOwnProperty(key) && (this.report[key] = []);
             this.report[key].push(params);
             return true;
