@@ -1,11 +1,6 @@
 'use strict';
 
-var TrackerConfig;
-(function (TrackerConfig) {
-    TrackerConfig["version"] = "1.0.0";
-})(TrackerConfig || (TrackerConfig = {}));
-
-const createHistoryEvnent = (type, eventName) => {
+const createHistoryEvent = (type, eventName) => {
     const origin = history[type];
     return function () {
         const res = origin.apply(this, arguments);
@@ -15,8 +10,8 @@ const createHistoryEvnent = (type, eventName) => {
     };
 };
 function createHistoryMonitoring(eventName = 'historyChange') {
-    window.history['pushState'] = createHistoryEvnent("pushState", eventName);
-    window.history['replaceState'] = createHistoryEvnent("replaceState", eventName);
+    window.history['pushState'] = createHistoryEvent("pushState", eventName);
+    window.history['replaceState'] = createHistoryEvent("replaceState", eventName);
     window.addEventListener('popstate', () => {
         window.dispatchEvent(new Event(eventName));
     });
@@ -24,33 +19,18 @@ function createHistoryMonitoring(eventName = 'historyChange') {
 function getLocation() {
     return window.location.pathname + window.location.hash;
 }
-function generateHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash << 5) - hash + str.charCodeAt(i);
-        hash |= 0;
+
+function sendBeacon(url, params) {
+    if (Object.keys(params).length <= 0) {
+        return false;
     }
-    return Math.abs(hash).toString(16).slice(0, 8);
+    const blob = new Blob([JSON.stringify(params)], {
+        type: 'application/x-www-form-urlencoded'
+    });
+    const state = navigator.sendBeacon(url, blob);
+    return state;
 }
-function getCanvasID(str = '#qx.chuckle,123456789<canvas>') {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-        return undefined;
-    }
-    var txt = str;
-    ctx.textBaseline = "top";
-    ctx.font = "14px 'Arial'";
-    ctx.textBaseline = "bottom";
-    ctx.fillStyle = "#f60";
-    ctx.fillRect(125, 1, 62, 20);
-    ctx.fillStyle = "#069";
-    ctx.fillText(txt, 2, 15);
-    ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-    ctx.fillText(txt, 4, 17);
-    const b64 = canvas.toDataURL().replace("data:image/png;base64,", "");
-    return generateHash(atob(b64));
-}
+
 function getDomPerformance(accuracy = 2) {
     const performanceData = performance.getEntriesByType('navigation')[0];
     if (!performanceData)
@@ -134,53 +114,43 @@ function urlHandle(url, type) {
     }
 }
 
-class Tracker {
+function generateHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash).toString(16).slice(0, 8);
+}
+function getCanvasID(str = '#qx.chuckle,123456789<canvas>') {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+        return undefined;
+    }
+    var txt = str;
+    ctx.textBaseline = "top";
+    ctx.font = "14px 'Arial'";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = "#f60";
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = "#069";
+    ctx.fillText(txt, 2, 15);
+    ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+    ctx.fillText(txt, 4, 17);
+    const b64 = canvas.toDataURL().replace("data:image/png;base64,", "");
+    return generateHash(atob(b64));
+}
+
+var TrackerConfig;
+(function (TrackerConfig) {
+    TrackerConfig["version"] = "1.0.0";
+})(TrackerConfig || (TrackerConfig = {}));
+
+class TrackerOptions {
     options;
-    enterTime;
-    report = {};
-    location;
     constructor(options) {
         this.options = Object.assign(this.initDefault(), options);
-        this.enterTime = new Date().getTime();
-        this.location = getLocation();
-        this.init();
-    }
-    init() {
-        try {
-            if (this.options.historyTracker) {
-                this.historyChangeReport();
-            }
-            if (this.options.hashTracker) {
-                this.hashChangeReport();
-            }
-            if (this.options.historyTracker || this.options.hashTracker) {
-                this.beforeCloseRouterReport();
-            }
-            if (this.options.domTracker) {
-                this.domEventReport();
-            }
-            if (this.options.errorTracker) {
-                this.errorReport();
-            }
-            if (this.options.performanceTracker) {
-                this.performanceReport();
-            }
-            if (!this.options.realTime) {
-                this.beforeCloseReport();
-            }
-        }
-        catch (e) {
-            this.reportTracker({
-                targetKey: "tracker",
-                message: "Tracker is error"
-            }, 'error');
-            if (this.options.log) {
-                console.error('Tracker is error');
-            }
-        }
-        if (this.options.log) {
-            console.log('Tracker is OK');
-        }
     }
     initDefault() {
         return {
@@ -198,6 +168,33 @@ class Tracker {
             realTime: false,
             maxSize: 1024 * 50
         };
+    }
+    generateUserID() {
+        return getCanvasID();
+    }
+}
+
+class LocationTracker {
+    options;
+    reportTracker;
+    enterTime;
+    location;
+    constructor(options, reportTracker) {
+        this.options = options;
+        this.reportTracker = reportTracker;
+        this.enterTime = new Date().getTime();
+        this.location = getLocation();
+    }
+    init() {
+        if (this.options.historyTracker) {
+            this.historyChangeReport();
+        }
+        if (this.options.hashTracker) {
+            this.hashChangeReport();
+        }
+        if (this.options.historyTracker || this.options.hashTracker) {
+            this.beforeCloseRouterReport();
+        }
     }
     reLocationRecord() {
         this.enterTime = new Date().getTime();
@@ -238,6 +235,23 @@ class Tracker {
             this.reportTracker(d, 'router');
         });
     }
+    getLocation() {
+        return this.location;
+    }
+}
+
+class DomTracker {
+    options;
+    reportTracker;
+    constructor(options, reportTracker) {
+        this.options = options;
+        this.reportTracker = reportTracker;
+    }
+    init() {
+        if (this.options.domTracker) {
+            this.domEventReport();
+        }
+    }
     domEventReport(data) {
         this.options.domEventsList?.forEach(event => {
             window.addEventListener(event, (e) => {
@@ -263,6 +277,20 @@ class Tracker {
             });
         });
     }
+}
+
+class ErrorTracker {
+    options;
+    reportTracker;
+    constructor(options, reportTracker) {
+        this.options = options;
+        this.reportTracker = reportTracker;
+    }
+    init() {
+        if (this.options.errorTracker) {
+            this.errorReport();
+        }
+    }
     errorReport() {
         this.errorEvent();
         this.promiseReject();
@@ -286,6 +314,20 @@ class Tracker {
                 }, 'error');
             });
         });
+    }
+}
+
+class PerformanceTracker {
+    options;
+    reportTracker;
+    constructor(options, reportTracker) {
+        this.options = options;
+        this.reportTracker = reportTracker;
+    }
+    init() {
+        if (this.options.performanceTracker) {
+            this.performanceReport();
+        }
     }
     performanceReport(accuracy = 2) {
         window.addEventListener('load', () => {
@@ -312,28 +354,57 @@ class Tracker {
             });
         });
     }
+}
+
+class Tracker extends TrackerOptions {
+    report = {};
+    locationTracker;
+    domTracker;
+    errorTracker;
+    performanceTracker;
+    constructor(options) {
+        super(options);
+        this.locationTracker = new LocationTracker(this.options, (data, key) => this.reportTracker(data, key));
+        this.domTracker = new DomTracker(this.options, (data, key) => this.reportTracker(data, key));
+        this.errorTracker = new ErrorTracker(this.options, (data, key) => this.reportTracker(data, key));
+        this.performanceTracker = new PerformanceTracker(this.options, (data, key) => this.reportTracker(data, key));
+        this.init();
+    }
+    init() {
+        try {
+            this.locationTracker.init();
+            this.domTracker.init();
+            this.errorTracker.init();
+            this.performanceTracker.init();
+            if (!this.options.realTime) {
+                this.beforeCloseReport();
+            }
+        }
+        catch (e) {
+            this.reportTracker({
+                targetKey: "tracker",
+                message: "Tracker is error"
+            }, 'error');
+            if (this.options.log) {
+                console.error('Tracker is error');
+            }
+        }
+        if (this.options.log) {
+            console.log('Tracker is OK');
+        }
+    }
     decorateData(data) {
         return Object.assign({}, {
             uuid: this.options.uuid,
             time: new Date().getTime(),
-            location: this.location,
+            location: this.locationTracker.getLocation(),
             extra: this.options.extra,
         }, data);
-    }
-    sendBeacon(params) {
-        if (Object.keys(params).length <= 0) {
-            return false;
-        }
-        const blob = new Blob([JSON.stringify(params)], {
-            type: 'application/x-www-form-urlencoded'
-        });
-        const state = navigator.sendBeacon(this.options.requestUrl, blob);
-        return state;
     }
     reportTracker(data, key) {
         const params = this.decorateData(data);
         if (this.options.realTime) {
-            return this.sendBeacon(params);
+            return sendBeacon(this.options.requestUrl, params);
         }
         else {
             if (this.options.maxSize && JSON.stringify(this.report).length * 2 > (this.options.maxSize || 10000)) {
@@ -352,9 +423,6 @@ class Tracker {
     setUserID(uuid) {
         this.options.uuid = uuid;
     }
-    generateUserID() {
-        return getCanvasID();
-    }
     setExtra(extra) {
         this.options.extra = extra;
     }
@@ -366,7 +434,7 @@ class Tracker {
         }, 'manual');
     }
     sendReport() {
-        const state = this.sendBeacon(this.report);
+        const state = sendBeacon(this.options.requestUrl, this.report);
         state && (this.report = {});
         return state;
     }

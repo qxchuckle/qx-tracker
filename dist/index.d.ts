@@ -17,30 +17,25 @@ interface Options extends Partial<DefaultOptions> {
     requestUrl: string;
 }
 
-declare class Tracker {
-    private options;
-    private enterTime;
+declare class TrackerOptions {
+    protected options: Options;
+    constructor(options: Options);
+    private initDefault;
+    generateUserID(): string | undefined;
+}
+
+declare class Tracker extends TrackerOptions {
     private report;
-    private location;
+    private locationTracker;
+    private domTracker;
+    private errorTracker;
+    private performanceTracker;
     constructor(options: Options);
     private init;
-    private initDefault;
-    private reLocationRecord;
-    private captureLocationEvent;
-    private historyChangeReport;
-    private hashChangeReport;
-    private beforeCloseRouterReport;
-    private domEventReport;
-    private errorReport;
-    private errorEvent;
-    private promiseReject;
-    private performanceReport;
     private decorateData;
-    private sendBeacon;
     private reportTracker;
     private beforeCloseReport;
     setUserID<T extends DefaultOptions['uuid']>(uuid: T): void;
-    generateUserID(): string | undefined;
     setExtra<T extends DefaultOptions['extra']>(extra: T): void;
     sendTracker<T>(targetKey?: string, data?: T): void;
     sendReport(): boolean;
