@@ -78,8 +78,9 @@ function getResourcePerformance(accuracy = 2) {
         resources[key].push({
             name: i.name,
             duration: i.duration.toFixed(accuracy),
-            size: i.transferSize.toFixed(accuracy),
-            protocol: i.nextHopProtocol,
+            type: i.entryType,
+            initiatorType: i.initiatorType,
+            size: i.decodedBodySize || i.transferSize,
         });
     });
     return resources;
@@ -187,10 +188,10 @@ class TrackerCls {
         this.options = options;
         this.reportTracker = reportTracker;
     }
-    addEventListener(name, handler) {
+    addEventListener(name, handler, options = false) {
         !this.eventListeners.hasOwnProperty(name) && (this.eventListeners[name] = []);
         this.eventListeners[name].push(handler);
-        window.addEventListener(name, handler);
+        window.addEventListener(name, handler, options);
     }
     destroy() {
         for (const eventName in this.eventListeners) {
@@ -282,7 +283,7 @@ class DomTracker extends TrackerCls {
             this.domEventReport();
         }
     }
-    domEventReport(data) {
+    domEventReport() {
         this.options.domEventsList?.forEach(event => {
             const eventHandler = (e) => {
                 const target = e.target;
@@ -299,9 +300,7 @@ class DomTracker extends TrackerCls {
                             name: target.localName ?? target.nodeName,
                             id: target.id,
                             classList: Array.from(target.classList),
-                            innerText: target.innerText,
-                        },
-                        data,
+                        }
                     }, 'dom');
                 }
             };
@@ -328,13 +327,27 @@ class ErrorTracker extends TrackerCls {
     errorEvent() {
         const eventName = 'error';
         const eventHandler = (e) => {
+            const [info, targetKey] = this.analyzeError(e);
             this.reportTracker({
-                targetKey: 'message',
+                targetKey: targetKey,
                 event: 'error',
-                message: e.message
+                info: info
             }, 'error');
         };
-        this.addEventListener(eventName, eventHandler);
+        this.addEventListener(eventName, eventHandler, true);
+    }
+    analyzeError(event) {
+        const target = event.target || event.srcElement;
+        if (target instanceof HTMLElement) {
+            return [{
+                    name: target.tagName || target.localName || target.nodeName,
+                    url: target.src || target.href,
+                }, "resource"];
+        }
+        if (event instanceof ErrorEvent) {
+            return [event.message, "js"];
+        }
+        return [event, "other"];
     }
     promiseReject() {
         const eventName = 'unhandledrejection';
@@ -343,7 +356,7 @@ class ErrorTracker extends TrackerCls {
                 this.reportTracker({
                     targetKey: "reject",
                     event: "promise",
-                    message: error
+                    info: error
                 }, 'error');
             });
         };
@@ -375,14 +388,17 @@ class PerformanceTracker extends TrackerCls {
             };
             this.reportTracker(data, 'performance');
             listenResourceLoad((entry) => {
+                const resource = {
+                    name: entry.name,
+                    duration: entry.duration.toFixed(accuracy),
+                    type: entry.entryType,
+                    initiatorType: entry.initiatorType,
+                    size: entry.decodedBodySize || entry.transferSize,
+                };
                 const data = {
-                    targetKey: 'resourceLoad',
+                    targetKey: 'resource',
                     event: 'load',
-                    resource: {
-                        name: entry.name,
-                        duration: entry.duration.toFixed(accuracy),
-                        type: entry.entryType
-                    }
+                    resource,
                 };
                 this.reportTracker(data, 'performance');
             });
@@ -447,7 +463,6 @@ class Tracker extends TrackerOptions {
             if (this.options.maxSize && size && size > (this.options.maxSize || 10000)) {
                 this.sendReport();
             }
-            console.log(size, data);
             !this.report.hasOwnProperty(key) && (this.report[key] = []);
             this.report[key].push(params);
             return true;

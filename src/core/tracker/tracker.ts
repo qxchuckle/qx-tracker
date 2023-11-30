@@ -11,10 +11,10 @@ export abstract class TrackerCls {
   }
   abstract init(): void
   // 封装addEventListener
-  protected addEventListener(name: string, handler: EventListenerOrEventListenerObject) {
+  protected addEventListener(name: string, handler: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions = false) {
     !this.eventListeners.hasOwnProperty(name) && (this.eventListeners[name] = [])
     this.eventListeners[name].push(handler)
-    window.addEventListener(name, handler)
+    window.addEventListener(name, handler, options)
   }
   // 销毁
   public destroy() {

@@ -1,4 +1,4 @@
-import { Options } from "../../types";
+import { Options, Resource } from "../../types";
 import { TrackerCls } from "./tracker";
 import { getDomPerformance, getResourcePerformance, listenResourceLoad } from "../../utils";
 
@@ -26,18 +26,20 @@ export default class PerformanceTracker extends TrackerCls {
         domPerformance,
         resourcePerformance
       }
-      // console.log(data)
       this.reportTracker(data, 'performance');
       // load完后开启资源的持续监控，例如后续请求以及图片的懒加载
       listenResourceLoad((entry) => {
+        const resource: Resource = {
+          name: entry.name,
+          duration: entry.duration.toFixed(accuracy),
+          type: entry.entryType,
+          initiatorType: entry.initiatorType,
+          size: entry.decodedBodySize || entry.transferSize, // 资源大小
+        }
         const data = {
-          targetKey: 'resourceLoad',
+          targetKey: 'resource',
           event: 'load',
-          resource: {
-            name: entry.name,
-            duration: entry.duration.toFixed(accuracy),
-            type: entry.entryType
-          }
+          resource,
         }
         // console.log(data)
         this.reportTracker(data, 'performance');

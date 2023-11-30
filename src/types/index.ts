@@ -26,13 +26,16 @@ export interface Options extends Partial<DefaultOptions> {
 export enum TrackerConfig {
   version = '1.0.0', // 版本
 }
+export type Resource = {
+  // PerformanceResourceTiming不再能获取资源大小
+  name: string;
+  duration: string | number, // 资源加载耗时
+  type: string, // 资源类型
+  initiatorType: string, // 发起资源请求的类型（标签名、请求方式等）
+  size?: string | number, // 资源大小
+}
 export type InitiatorTypeLiteral = {
-  [K in PerformanceResourceTiming["initiatorType"]]: Array<{
-    name: string;
-    duration: string | number, // 资源加载耗时
-    size: string | number, // 资源大小
-    protocol: string, // 资源所用协议
-  }>;
+  [K in PerformanceResourceTiming["initiatorType"]]: Array<Resource>;
 };
 
 export type EventListeners = {

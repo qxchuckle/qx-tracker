@@ -2,7 +2,7 @@ import { Options } from "../../types";
 import { TrackerCls } from "./tracker";
 
 export default class ErrorTracker extends TrackerCls {
-  
+
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
     this.options = options;
@@ -21,15 +21,30 @@ export default class ErrorTracker extends TrackerCls {
   private errorEvent() {
     const eventName = 'error';
     const eventHandler: EventListenerOrEventListenerObject = (e) => {
+      const [info, targetKey] = this.analyzeError(e)
       this.reportTracker({
-        targetKey: 'message',
+        targetKey: targetKey,
         event: 'error',
-        message: (e as ErrorEvent).message
+        info: info
       }, 'error')
     }
-    this.addEventListener(eventName, eventHandler)
+    this.addEventListener(eventName, eventHandler, true)
   }
-  //捕获promise 错误
+  private analyzeError(event: Event): [object | string, string] {
+    const target = event.target || event.srcElement;
+    // 判断是否是link、script等元素节点，区分JS错误和资源加载错误
+    if (target instanceof HTMLElement) {
+      return [{
+        name: target.tagName || target.localName || target.nodeName,
+        url: (target as any).src || (target as any).href,
+      }, "resource"]
+    }
+    if (event instanceof ErrorEvent) {
+      return [event.message, "js"];
+    }
+    return [event, "other"];
+  }
+  //捕获promise错误
   private promiseReject() {
     const eventName = 'unhandledrejection';
     const eventHandler: EventListenerOrEventListenerObject = (event) => {
@@ -37,7 +52,7 @@ export default class ErrorTracker extends TrackerCls {
         this.reportTracker({
           targetKey: "reject",
           event: "promise",
-          message: error
+          info: error
         }, 'error')
       })
     }

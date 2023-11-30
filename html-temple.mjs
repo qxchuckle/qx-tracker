@@ -26,6 +26,12 @@ setTimeout(() =>{
   imgElement.style.maxWidth = '100px';
   document.body.appendChild(imgElement);
 },1000)
+setTimeout(() =>{
+  const imgElement = document.createElement('img');
+  imgElement.src = 'https://aaabbbcccddd123456789.com/index.png';
+  imgElement.style.maxWidth = '100px';
+  document.body.appendChild(imgElement);
+},2000)
 `
 
 export const htmlDevTemple = {
@@ -56,12 +62,24 @@ function renderHtml(additionalBody, { attributes, bundle, files, publicPath, tit
     <head>
       ${renderMeta(meta)}
       <title>${title}</title>
+      <!-- 测试资源加载错误 --> 
+      <link rel="stylesheet" href="https://aaabbbcccddd123456789.com/index.css">
     </head>
     <body>
       <h1>Test</h1>
+      <p>功能测试</p>
+      <button onclick="javascript:tk.sendReport();">手动上报</button>
       <button class="a b c" id="d" target-key="btn" target-events="['click']">dom事件上报测试</button>
-      <div target-key="div" target-events="['mouseover', 'mouseout']" style="width:100px;height:100px;background-color:blue;"></div>
+      <button onclick="javascript:fetch('https://avatars.githubusercontent.com/u/55614189?v=4');">fetch请求</button>
+      <div id="e" target-key="div" target-events="['mouseover', 'mouseout']" style="width:100px;height:100px;background-color:blue;margin: 30px 0;"></div>
+      <p>error捕获测试</p>
+      <button onclick="javascript:throw new Error('This is an error message');">console.error</button>
+      <button onclick="javascript:fetch('https://aaabbbcccddd123456789.com/index.json');">fetch(promise)请求错误</button>
+      <p></p>
       <img src="https://avatars.githubusercontent.com/u/55614189?v=4" width="100" />
+      <!-- 测试资源加载错误 --> 
+      <img src="https://aaabbbcccddd123456789.com/index.png" width="100" />
+      <script src="https://aaabbbcccddd123456789.com/index.js"></script>
       ${arrToString(additionalBody)}
     </body>
     </html>`;

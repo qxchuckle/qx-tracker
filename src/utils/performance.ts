@@ -17,7 +17,7 @@ export function getDomPerformance(accuracy: number = 2): object | null {
   }
 }
 
-// 获取已经加载完毕的资源的性能信息
+// 获取首屏已经加载完毕的资源的性能信息
 export function getResourcePerformance(accuracy: number = 2): InitiatorTypeLiteral | null {
   if (!window.performance) return null;
   const data = window.performance.getEntriesByType('resource')
@@ -40,15 +40,16 @@ export function getResourcePerformance(accuracy: number = 2): InitiatorTypeLiter
     resources[key].push({
       name: i.name, // 资源的名称
       duration: i.duration.toFixed(accuracy), // 资源加载耗时
-      size: i.transferSize.toFixed(accuracy), // 资源大小
-      protocol: i.nextHopProtocol, // 资源所用协议
+      type: i.entryType, // 资源类型
+      initiatorType: i.initiatorType, // 发起资源请求的类型（标签名）
+      size: i.decodedBodySize || i.transferSize, // 资源大小
     })
   })
   return resources;
 }
 
 // 监听资源加载
-export function listenResourceLoad(callback: (arg0: PerformanceEntry) => void) {
+export function listenResourceLoad(callback: (arg0: PerformanceResourceTiming) => void) {
   const observer = new PerformanceObserver((list, _observer) => {
     list.getEntries().forEach((entry) => {
       const e = entry as PerformanceResourceTiming;

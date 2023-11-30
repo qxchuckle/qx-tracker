@@ -2,7 +2,7 @@ import { Options } from "../../types";
 import { TrackerCls } from "./tracker";
 
 export default class DomTracker extends TrackerCls {
-  
+
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
     this.options = options;
@@ -14,7 +14,7 @@ export default class DomTracker extends TrackerCls {
     }
   }
   // 监听dom事件，并上报相关数据
-  private domEventReport<T>(data?: T) {
+  private domEventReport() {
     this.options.domEventsList?.forEach(event => {
       const eventHandler: EventListenerOrEventListenerObject = (e) => {
         const target = e.target as HTMLElement;
@@ -36,9 +36,8 @@ export default class DomTracker extends TrackerCls {
               name: target.localName ?? target.nodeName,
               id: target.id,
               classList: Array.from(target.classList),
-              innerText: target.innerText,
-            },
-            data,
+              // innerText: target.innerText,
+            }
           }, 'dom')
         }
       }
