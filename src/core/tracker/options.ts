@@ -3,6 +3,7 @@ import { getCanvasID } from "../../utils";
 
 export default class TrackerOptions {
   protected options: Options
+  
   constructor(options: Options) {
     // 合并默认和用户传入设置，用户传入设置优先级高
     this.options = Object.assign(this.initDefault(), options);

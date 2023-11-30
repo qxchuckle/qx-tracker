@@ -1,10 +1,10 @@
 import { Options } from "../../types";
+import { TrackerCls } from "./tracker";
 
-export default class ErrorTracker {
-  protected options: Options
-  private reportTracker: Function // 上报数据的方法
-
+export default class ErrorTracker extends TrackerCls {
+  
   constructor(options: Options, reportTracker: Function) {
+    super(options, reportTracker);
     this.options = options;
     this.reportTracker = reportTracker;
   }
@@ -19,24 +19,28 @@ export default class ErrorTracker {
   }
   //捕获报错
   private errorEvent() {
-    window.addEventListener('error', (e) => {
+    const eventName = 'error';
+    const eventHandler: EventListenerOrEventListenerObject = (e) => {
       this.reportTracker({
         targetKey: 'message',
         event: 'error',
-        message: e.message
+        message: (e as ErrorEvent).message
       }, 'error')
-    }, true)
+    }
+    this.addEventListener(eventName, eventHandler)
   }
   //捕获promise 错误
   private promiseReject() {
-    window.addEventListener('unhandledrejection', (event) => {
-      event.promise.catch(error => {
+    const eventName = 'unhandledrejection';
+    const eventHandler: EventListenerOrEventListenerObject = (event) => {
+      (event as PromiseRejectionEvent).promise.catch(error => {
         this.reportTracker({
           targetKey: "reject",
           event: "promise",
           message: error
         }, 'error')
       })
-    })
+    }
+    this.addEventListener(eventName, eventHandler)
   }
 }

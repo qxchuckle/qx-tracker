@@ -35,3 +35,6 @@ export type InitiatorTypeLiteral = {
   }>;
 };
 
+export type EventListeners = {
+  [eventName: string]: Array<EventListenerOrEventListenerObject>;
+};

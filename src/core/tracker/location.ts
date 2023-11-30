@@ -1,14 +1,14 @@
 
 import { Options } from "../../types";
+import { TrackerCls } from "./tracker";
 import { createHistoryMonitoring, getLocation } from "../../utils";
 
-export default class LocationTracker {
-  protected options: Options
-  private reportTracker: Function // 上报数据的方法
+export default class LocationTracker extends TrackerCls {
   private enterTime: number   // 记录用户进入当前页面时的时间戳
   private location: string // 记录用户当前页面
 
   constructor(options: Options, reportTracker: Function) {
+    super(options, reportTracker);
     this.options = options;
     this.reportTracker = reportTracker;
     this.enterTime = new Date().getTime();
@@ -32,7 +32,7 @@ export default class LocationTracker {
   }
   // 进行location监听
   private captureLocationEvent<T>(event: string, targetKey: string, data?: T) {
-    window.addEventListener(event, () => {
+    const eventHandler: EventListenerOrEventListenerObject = () => {
       const d = {
         event, // 事件类型
         targetKey, // 目标key，按后端需要自定义
@@ -45,7 +45,8 @@ export default class LocationTracker {
       // console.log(d);
       this.reportTracker(d, 'router');
       this.reLocationRecord();
-    })
+    }
+    this.addEventListener(event, eventHandler)
   }
   // 监听history变化
   private historyChangeReport(eventName: string = 'historyChange') {
@@ -62,16 +63,17 @@ export default class LocationTracker {
     if (!this.options.realTime) {
       return;
     }
-    // 在页面关闭前上报数据
-    window.addEventListener("beforeunload", () => {
+    const eventName = "beforeunload";
+    const eventHandler: EventListenerOrEventListenerObject = () => {
       const d = {
-        event: 'beforeunload',
+        event: eventName,
         targetKey: 'close',
         location: this.location,
         duration: new Date().getTime() - this.enterTime,
       }
       this.reportTracker(d, 'router');
-    });
+    }
+    this.addEventListener(eventName, eventHandler)
   }
   // 给外部提供页面信息
   public getLocation(): string {

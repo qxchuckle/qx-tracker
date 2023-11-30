@@ -30,6 +30,9 @@ declare class Tracker extends TrackerOptions {
     private domTracker;
     private errorTracker;
     private performanceTracker;
+    private stringSizeCalculation;
+    private beforeCloseHandler;
+    isDestroy: boolean;
     constructor(options: Options);
     private init;
     private decorateData;
@@ -39,6 +42,7 @@ declare class Tracker extends TrackerOptions {
     setExtra<T extends DefaultOptions['extra']>(extra: T): void;
     sendTracker<T>(targetKey?: string, data?: T): void;
     sendReport(): boolean;
+    destroy(): void;
 }
 
 export { Tracker as default };

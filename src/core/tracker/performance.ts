@@ -1,11 +1,11 @@
 import { Options } from "../../types";
+import { TrackerCls } from "./tracker";
 import { getDomPerformance, getResourcePerformance, listenResourceLoad } from "../../utils";
 
-export default class PerformanceTracker {
-  protected options: Options
-  private reportTracker: Function // 上报数据的方法
+export default class PerformanceTracker extends TrackerCls {
 
   constructor(options: Options, reportTracker: Function) {
+    super(options, reportTracker);
     this.options = options;
     this.reportTracker = reportTracker;
   }
@@ -16,7 +16,8 @@ export default class PerformanceTracker {
   }
   // 性能监控上报
   private performanceReport(accuracy: number = 2) {
-    window.addEventListener('load', () => {
+    const eventName = 'load';
+    const eventHandler: EventListenerOrEventListenerObject = () => {
       const domPerformance = getDomPerformance(accuracy);
       const resourcePerformance = getResourcePerformance(accuracy);
       const data = {
@@ -41,6 +42,7 @@ export default class PerformanceTracker {
         // console.log(data)
         this.reportTracker(data, 'performance');
       })
-    })
+    }
+    this.addEventListener(eventName, eventHandler)
   }
 }

@@ -12,7 +12,8 @@
       <script type="module">
         import Tracker from './index.esm.js';
         
-const tk = new Tracker({
+// 挂载到window上便于访问实例
+window.tk = new Tracker({
   "requestUrl": 'http://127.0.0.1:9000/tracker',
   "historyTracker": false,
   "hashTracker": true,

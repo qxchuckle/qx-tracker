@@ -1,10 +1,10 @@
 import { Options } from "../../types";
+import { TrackerCls } from "./tracker";
 
-export default class DomTracker {
-  protected options: Options
-  private reportTracker: Function // 上报数据的方法
-
+export default class DomTracker extends TrackerCls {
+  
   constructor(options: Options, reportTracker: Function) {
+    super(options, reportTracker);
     this.options = options;
     this.reportTracker = reportTracker;
   }
@@ -16,7 +16,7 @@ export default class DomTracker {
   // 监听dom事件，并上报相关数据
   private domEventReport<T>(data?: T) {
     this.options.domEventsList?.forEach(event => {
-      window.addEventListener(event, (e) => {
+      const eventHandler: EventListenerOrEventListenerObject = (e) => {
         const target = e.target as HTMLElement;
         // 设置target-events属性，元素层次限制上报的事件
         const targetEvents = JSON.stringify(target.getAttribute('target-events'));
@@ -41,7 +41,8 @@ export default class DomTracker {
             data,
           }, 'dom')
         }
-      })
+      }
+      this.addEventListener(event, eventHandler)
     })
   }
 }
