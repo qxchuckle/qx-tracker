@@ -99,6 +99,7 @@ function listenResourceLoad(callback) {
     observer.observe({
         entryTypes: ["resource"],
     });
+    return observer;
 }
 function urlHandle(url, type) {
     let filename = url.substring(url.lastIndexOf('/') + 1);
@@ -203,12 +204,13 @@ class TrackerCls {
             }
         }
         this.eventListeners = {};
+        this.additionalDestroy();
     }
 }
 
 class LocationTracker extends TrackerCls {
-    enterTime;
-    location;
+    enterTime = undefined;
+    location = undefined;
     constructor(options, reportTracker) {
         super(options, reportTracker);
         this.options = options;
@@ -226,6 +228,10 @@ class LocationTracker extends TrackerCls {
         if (this.options.historyTracker || this.options.hashTracker) {
             this.beforeCloseRouterReport();
         }
+    }
+    additionalDestroy() {
+        this.enterTime = undefined;
+        this.location = undefined;
     }
     reLocationRecord() {
         this.enterTime = new Date().getTime();
@@ -285,6 +291,7 @@ class DomTracker extends TrackerCls {
             this.domEventReport();
         }
     }
+    additionalDestroy() { }
     domEventReport() {
         this.options.domEventsList?.forEach(event => {
             const eventHandler = (e) => {
@@ -322,6 +329,7 @@ class ErrorTracker extends TrackerCls {
             this.errorReport();
         }
     }
+    additionalDestroy() { }
     errorReport() {
         this.errorEvent();
         this.promiseReject();
@@ -367,6 +375,7 @@ class ErrorTracker extends TrackerCls {
 }
 
 class PerformanceTracker extends TrackerCls {
+    performanceObserver = undefined;
     constructor(options, reportTracker) {
         super(options, reportTracker);
         this.options = options;
@@ -389,7 +398,7 @@ class PerformanceTracker extends TrackerCls {
                 resourcePerformance
             };
             this.reportTracker(data, 'performance');
-            listenResourceLoad((entry) => {
+            this.performanceObserver = listenResourceLoad((entry) => {
                 const resource = {
                     name: entry.name,
                     duration: entry.duration.toFixed(accuracy),
@@ -406,6 +415,9 @@ class PerformanceTracker extends TrackerCls {
             });
         };
         this.addEventListener(eventName, eventHandler);
+    }
+    additionalDestroy() {
+        this.performanceObserver?.disconnect();
     }
 }
 

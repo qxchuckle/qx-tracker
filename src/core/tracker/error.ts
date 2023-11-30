@@ -13,6 +13,7 @@ export default class ErrorTracker extends TrackerCls {
       this.errorReport()
     }
   }
+  additionalDestroy() { }
   private errorReport() {
     this.errorEvent()
     this.promiseReject()

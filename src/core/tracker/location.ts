@@ -4,8 +4,8 @@ import { TrackerCls } from "./tracker";
 import { createHistoryMonitoring, getLocation } from "../../utils";
 
 export default class LocationTracker extends TrackerCls {
-  private enterTime: number   // 记录用户进入当前页面时的时间戳
-  private location: string // 记录用户当前页面
+  private enterTime: number | undefined = undefined   // 记录用户进入当前页面时的时间戳
+  private location: string | undefined = undefined // 记录用户当前页面
 
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
@@ -25,6 +25,10 @@ export default class LocationTracker extends TrackerCls {
       this.beforeCloseRouterReport()
     }
   }
+  additionalDestroy() {
+    this.enterTime = undefined;
+    this.location = undefined;
+  }
   // 更新当前路径和进入时间
   private reLocationRecord() {
     this.enterTime = new Date().getTime();
@@ -39,7 +43,7 @@ export default class LocationTracker extends TrackerCls {
         location: this.location,
         targetLocation: getLocation(),
         // 用户访问该路由时长
-        duration: new Date().getTime() - this.enterTime,
+        duration: new Date().getTime() - this.enterTime!,
         data, // 额外的数据
       }
       // console.log(d);
@@ -69,7 +73,7 @@ export default class LocationTracker extends TrackerCls {
         event: eventName,
         targetKey: 'close',
         location: this.location,
-        duration: new Date().getTime() - this.enterTime,
+        duration: new Date().getTime() - this.enterTime!,
       }
       this.reportTracker(d, 'router');
     }
@@ -77,6 +81,6 @@ export default class LocationTracker extends TrackerCls {
   }
   // 给外部提供页面信息
   public getLocation(): string {
-    return this.location
+    return this.location!
   }
 }

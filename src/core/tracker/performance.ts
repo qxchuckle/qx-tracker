@@ -3,6 +3,7 @@ import { TrackerCls } from "./tracker";
 import { getDomPerformance, getResourcePerformance, listenResourceLoad } from "../../utils";
 
 export default class PerformanceTracker extends TrackerCls {
+  private performanceObserver: PerformanceObserver | undefined = undefined
 
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
@@ -28,7 +29,7 @@ export default class PerformanceTracker extends TrackerCls {
       }
       this.reportTracker(data, 'performance');
       // load完后开启资源的持续监控，例如后续请求以及图片的懒加载
-      listenResourceLoad((entry) => {
+      this.performanceObserver = listenResourceLoad((entry) => {
         const resource: Resource = {
           name: entry.name,
           duration: entry.duration.toFixed(accuracy),
@@ -46,5 +47,8 @@ export default class PerformanceTracker extends TrackerCls {
       })
     }
     this.addEventListener(eventName, eventHandler)
+  }
+  additionalDestroy() {
+    this.performanceObserver?.disconnect();
   }
 }

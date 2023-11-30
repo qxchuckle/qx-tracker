@@ -103,6 +103,7 @@
         observer.observe({
             entryTypes: ["resource"],
         });
+        return observer;
     }
     function urlHandle(url, type) {
         let filename = url.substring(url.lastIndexOf('/') + 1);
@@ -207,12 +208,13 @@
                 }
             }
             this.eventListeners = {};
+            this.additionalDestroy();
         }
     }
 
     class LocationTracker extends TrackerCls {
-        enterTime;
-        location;
+        enterTime = undefined;
+        location = undefined;
         constructor(options, reportTracker) {
             super(options, reportTracker);
             this.options = options;
@@ -230,6 +232,10 @@
             if (this.options.historyTracker || this.options.hashTracker) {
                 this.beforeCloseRouterReport();
             }
+        }
+        additionalDestroy() {
+            this.enterTime = undefined;
+            this.location = undefined;
         }
         reLocationRecord() {
             this.enterTime = new Date().getTime();
@@ -289,6 +295,7 @@
                 this.domEventReport();
             }
         }
+        additionalDestroy() { }
         domEventReport() {
             this.options.domEventsList?.forEach(event => {
                 const eventHandler = (e) => {
@@ -326,6 +333,7 @@
                 this.errorReport();
             }
         }
+        additionalDestroy() { }
         errorReport() {
             this.errorEvent();
             this.promiseReject();
@@ -371,6 +379,7 @@
     }
 
     class PerformanceTracker extends TrackerCls {
+        performanceObserver = undefined;
         constructor(options, reportTracker) {
             super(options, reportTracker);
             this.options = options;
@@ -393,7 +402,7 @@
                     resourcePerformance
                 };
                 this.reportTracker(data, 'performance');
-                listenResourceLoad((entry) => {
+                this.performanceObserver = listenResourceLoad((entry) => {
                     const resource = {
                         name: entry.name,
                         duration: entry.duration.toFixed(accuracy),
@@ -410,6 +419,9 @@
                 });
             };
             this.addEventListener(eventName, eventHandler);
+        }
+        additionalDestroy() {
+            this.performanceObserver?.disconnect();
         }
     }
 

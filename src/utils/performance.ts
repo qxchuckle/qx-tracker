@@ -49,7 +49,7 @@ export function getResourcePerformance(accuracy: number = 2): InitiatorTypeLiter
 }
 
 // 监听资源加载
-export function listenResourceLoad(callback: (arg0: PerformanceResourceTiming) => void) {
+export function listenResourceLoad(callback: (arg0: PerformanceResourceTiming) => void): PerformanceObserver {
   const observer = new PerformanceObserver((list, _observer) => {
     list.getEntries().forEach((entry) => {
       const e = entry as PerformanceResourceTiming;
@@ -61,6 +61,7 @@ export function listenResourceLoad(callback: (arg0: PerformanceResourceTiming) =
   observer.observe({
     entryTypes: ["resource"],
   });
+  return observer;
 }
 
 // 获取url中需要的数据  type  1: 获取文件名  2：获取后缀  3：获取文件名+后缀  4:获取文件前缀

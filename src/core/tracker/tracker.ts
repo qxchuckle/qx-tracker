@@ -16,6 +16,8 @@ export abstract class TrackerCls {
     this.eventListeners[name].push(handler)
     window.addEventListener(name, handler, options)
   }
+  // 额外需要销毁的
+  abstract additionalDestroy(): void
   // 销毁
   public destroy() {
     for (const eventName in this.eventListeners) {
@@ -25,5 +27,6 @@ export abstract class TrackerCls {
       }
     }
     this.eventListeners = {};
+    this.additionalDestroy();
   }
 }

@@ -13,6 +13,7 @@ export default class DomTracker extends TrackerCls {
       this.domEventReport()
     }
   }
+  additionalDestroy() { }
   // 监听dom事件，并上报相关数据
   private domEventReport() {
     this.options.domEventsList?.forEach(event => {
