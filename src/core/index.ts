@@ -29,17 +29,13 @@ export default class Tracker extends TrackerOptions {
         this.beforeCloseReport()
       }
     } catch (e) {
-      this.reportTracker({
+      sendBeacon(this.options.requestUrl, this.decorateData({
         targetKey: "tracker",
         message: "Tracker is error"
-      }, 'error')
-      if (this.options.log) {
-        console.error('Tracker is error');
-      }
+      }));
+      this.options.log && console.error('Tracker is error');
     }
-    if (this.options.log) {
-      console.log('Tracker is OK');
-    }
+    this.options.log && console.log('Tracker is OK');
   }
   // 修饰数据，加上统一信息
   private decorateData<T>(data: T) {
