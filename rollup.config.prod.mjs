@@ -1,7 +1,7 @@
-import html from '@rollup/plugin-html';
+// import html from '@rollup/plugin-html';
 // import terser from '@rollup/plugin-terser';
 import common from './rollup.config.common.mjs';
-import { htmlProdTemple } from './html-temple.mjs';
+// import { htmlProdTemple } from './html-temple.mjs';
 import dts from 'rollup-plugin-dts';
 
 export default [Object.assign({}, common, {
@@ -47,7 +47,7 @@ export default [Object.assign({}, common, {
   ],
   plugins: [
     ...common.plugins,
-    html(htmlProdTemple)
+    // html(htmlProdTemple)
   ],
 }),
 {
