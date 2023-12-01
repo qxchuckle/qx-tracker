@@ -38,12 +38,12 @@ export default class ErrorTracker extends TrackerCls {
       return [{
         name: target.tagName || target.localName || target.nodeName,
         url: (target as any).src || (target as any).href,
-      }, "resource"]
+      }, "resourceError"]
     }
     if (event instanceof ErrorEvent) {
-      return [event.message, "js"];
+      return [event.message, "jsError"];
     }
-    return [event, "other"];
+    return [event, "otherError"];
   }
   //捕获promise错误
   private promiseReject() {

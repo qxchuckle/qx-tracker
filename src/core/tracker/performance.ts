@@ -38,7 +38,7 @@ export default class PerformanceTracker extends TrackerCls {
           size: entry.decodedBodySize || entry.transferSize, // 资源大小
         }
         const data = {
-          targetKey: 'resource',
+          targetKey: 'resourceLoad',
           event: 'load',
           resource,
         }

@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.tracker = factory());
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Tracker = factory());
 })(this, (function () { 'use strict';
 
     const createHistoryEvent = (type, eventName) => {
@@ -356,12 +356,12 @@
                 return [{
                         name: target.tagName || target.localName || target.nodeName,
                         url: target.src || target.href,
-                    }, "resource"];
+                    }, "resourceError"];
             }
             if (event instanceof ErrorEvent) {
-                return [event.message, "js"];
+                return [event.message, "jsError"];
             }
-            return [event, "other"];
+            return [event, "otherError"];
         }
         promiseReject() {
             const eventName = 'unhandledrejection';
@@ -411,7 +411,7 @@
                         size: entry.decodedBodySize || entry.transferSize,
                     };
                     const data = {
-                        targetKey: 'resource',
+                        targetKey: 'resourceLoad',
                         event: 'load',
                         resource,
                     };
@@ -481,6 +481,7 @@
                 if (this.options.maxSize && size && size > (this.options.maxSize || 10000)) {
                     this.sendReport();
                 }
+                console.log(size, params);
                 !this.report.hasOwnProperty(key) && (this.report[key] = []);
                 this.report[key].push(params);
                 return true;

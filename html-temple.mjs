@@ -37,10 +37,11 @@ setTimeout(() =>{
 export const htmlDevTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const script = `<script type="module">
-        import Tracker from './index.js';
-        ${testJS}
-    </script>`;
+    const script = `<script src="./index.js"></script>
+    <script>${testJS}</script>
+    <script>throw 1;</script>
+    <script>console.log(abcde)</script>
+    `;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
@@ -48,20 +49,23 @@ export const htmlDevTemple = {
 export const htmlProdTemple = {
   ...config,
   template({ attributes, bundle, files, publicPath, title, meta }) {
-    const script = `<script type="module">
-        import Tracker from './index.esm.js';
-        ${testJS}
-    </script>`;
+    const script = `<script src="./index.js"></script>
+    <script>${testJS}</script>
+    <script>throw 1;</script>
+    <script>console.log(abcde)</script>
+    `;
     return renderHtml([script], { attributes, bundle, files, publicPath, title, meta });
   }
 }
 
-function renderHtml(additionalBody, { attributes, bundle, files, publicPath, title, meta }) {
+function renderHtml(scripts, { attributes, bundle, files, publicPath, title, meta }) {
   return `<!DOCTYPE html>
     <html${renderAttributes(attributes)}>
     <head>
       ${renderMeta(meta)}
       <title>${title}</title>
+      <!-- 监控要在最开始执行 --> 
+      ${arrToString(scripts)}
       <!-- 测试资源加载错误 --> 
       <link rel="stylesheet" href="https://aaabbbcccddd123456789.com/index.css">
     </head>
@@ -80,7 +84,6 @@ function renderHtml(additionalBody, { attributes, bundle, files, publicPath, tit
       <!-- 测试资源加载错误 --> 
       <img src="https://aaabbbcccddd123456789.com/index.png" width="100" />
       <script src="https://aaabbbcccddd123456789.com/index.js"></script>
-      ${arrToString(additionalBody)}
     </body>
     </html>`;
 }

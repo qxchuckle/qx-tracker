@@ -9,7 +9,8 @@ export default Object.assign({}, common, {
     {
       dir: 'dist',
       entryFileNames: '[name].js',
-      format: 'es',
+      format: 'umd',
+      name: "Tracker"
     }
   ],
   plugins: [

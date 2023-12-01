@@ -350,12 +350,12 @@ class ErrorTracker extends TrackerCls {
             return [{
                     name: target.tagName || target.localName || target.nodeName,
                     url: target.src || target.href,
-                }, "resource"];
+                }, "resourceError"];
         }
         if (event instanceof ErrorEvent) {
-            return [event.message, "js"];
+            return [event.message, "jsError"];
         }
-        return [event, "other"];
+        return [event, "otherError"];
     }
     promiseReject() {
         const eventName = 'unhandledrejection';
@@ -405,7 +405,7 @@ class PerformanceTracker extends TrackerCls {
                     size: entry.decodedBodySize || entry.transferSize,
                 };
                 const data = {
-                    targetKey: 'resource',
+                    targetKey: 'resourceLoad',
                     event: 'load',
                     resource,
                 };
@@ -475,6 +475,7 @@ class Tracker extends TrackerOptions {
             if (this.options.maxSize && size && size > (this.options.maxSize || 10000)) {
                 this.sendReport();
             }
+            console.log(size, params);
             !this.report.hasOwnProperty(key) && (this.report[key] = []);
             this.report[key].push(params);
             return true;

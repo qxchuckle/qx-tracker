@@ -11,7 +11,7 @@ export default [Object.assign({}, common, {
       dir: 'dist',
       entryFileNames: '[name].js',
       format: 'umd',
-      name: "tracker"
+      name: "Tracker"
     },
     // {
     //   dir: 'dist',

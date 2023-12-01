@@ -62,7 +62,7 @@ export default class Tracker extends TrackerOptions {
       if (this.options.maxSize && size && size > (this.options.maxSize || 10000)) {
         this.sendReport();
       }
-      // console.log(size, params);
+      console.log(size, params);
       !this.report.hasOwnProperty(key) && (this.report[key] = []);
       this.report[key].push(params);
       return true;
