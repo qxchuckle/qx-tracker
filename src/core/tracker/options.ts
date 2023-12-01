@@ -12,7 +12,7 @@ export default class TrackerOptions {
   private initDefault(): DefaultOptions {
     return <DefaultOptions>{
       uuid: this.generateUserID(),
-      requestUrl: undefined,
+      requestUrl: "",
       historyTracker: false,
       hashTracker: false,
       errorTracker: false,

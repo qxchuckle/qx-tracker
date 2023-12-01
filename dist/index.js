@@ -156,7 +156,7 @@
     }
 
     function createLog() {
-        return null;
+        return;
     }
     const log = createLog();
 
@@ -173,7 +173,7 @@
         initDefault() {
             return {
                 uuid: this.generateUserID(),
-                requestUrl: undefined,
+                requestUrl: "",
                 historyTracker: false,
                 hashTracker: false,
                 errorTracker: false,
@@ -360,6 +360,7 @@
             if (target instanceof HTMLElement) {
                 return [{
                         name: target.tagName || target.localName || target.nodeName,
+                        class: target.className || null,
                         url: target.src || target.href,
                     }, "resourceError"];
             }
