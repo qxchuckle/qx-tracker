@@ -11,8 +11,8 @@ export default class TrackerOptions {
   // 初始化配置项
   private initDefault(): DefaultOptions {
     return <DefaultOptions>{
-      uuid: this.generateUserID(),
       requestUrl: "",
+      uuid: this.generateUserID(),
       historyTracker: false,
       hashTracker: false,
       errorTracker: false,

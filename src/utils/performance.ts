@@ -26,6 +26,7 @@ export function getResourcePerformance(accuracy: number = 2): InitiatorTypeLiter
   data.forEach(item => {
     const i = item as PerformanceResourceTiming;
     let key = i.initiatorType || 'other';
+    if (key === 'beacon') return; // 跳过beacon上报请求
     if (key === 'other') {
       const extension = urlHandle(i.name, 2)
       switch (extension) {

@@ -55,6 +55,8 @@ function getResourcePerformance(accuracy = 2) {
     data.forEach(item => {
         const i = item;
         let key = i.initiatorType || 'other';
+        if (key === 'beacon')
+            return;
         if (key === 'other') {
             const extension = urlHandle(i.name, 2);
             switch (extension) {
@@ -168,8 +170,8 @@ class TrackerOptions {
     }
     initDefault() {
         return {
-            uuid: this.generateUserID(),
             requestUrl: "",
+            uuid: this.generateUserID(),
             historyTracker: false,
             hashTracker: false,
             errorTracker: false,
