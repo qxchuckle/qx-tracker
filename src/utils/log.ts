@@ -1,5 +1,5 @@
 export function createLog() {
-  if (__env__ === 'production') return null;
+  if (__env__ === 'production') return;
   return function log(...args: any) {
     console.log(...args)
   }

@@ -1,6 +1,7 @@
+type Optional<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
 interface DefaultOptions {
+    requestUrl: string;
     uuid: string | undefined;
-    requestUrl: string | undefined;
     historyTracker: boolean;
     hashTracker: boolean;
     errorTracker: boolean;
@@ -13,9 +14,7 @@ interface DefaultOptions {
     realTime: boolean;
     maxSize: number;
 }
-interface Options extends Partial<DefaultOptions> {
-    requestUrl: string;
-}
+type Options = Optional<DefaultOptions, 'requestUrl'>;
 
 declare class TrackerOptions {
     protected options: Options;

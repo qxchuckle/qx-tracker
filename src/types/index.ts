@@ -1,7 +1,14 @@
+/**
+ * 选项生成器
+ * @param T - 原始类型
+ * @param K - 必填类型
+ */
+type Optional<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>; 
+
 // 选项
 export interface DefaultOptions {
+  requestUrl: string,
   uuid: string | undefined,
-  requestUrl: string | undefined,
   historyTracker: boolean,
   hashTracker: boolean,
   errorTracker: boolean,
@@ -14,13 +21,12 @@ export interface DefaultOptions {
   realTime: boolean,
   maxSize: number,
 }
+
+// 用户传入选项
+export type Options = Optional<DefaultOptions, 'requestUrl'>
+
 export type Report = {
   [x in string]: any[]
-}
-// 用户传入选项
-export interface Options extends Partial<DefaultOptions> {
-  // 必传项
-  requestUrl: string,
 }
 // 一些设置
 export enum TrackerConfig {
