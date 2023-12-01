@@ -52,8 +52,8 @@ type Options = Optional<DefaultOptions, 'requestUrl'>
 // 默认值
 private initDefault(): types.DefaultOptions {
   return <types.DefaultOptions>{
-    uuid: this.generateUserID(),
     requestUrl: "",
+    uuid: this.generateUserID(),
     historyTracker: false,
     hashTracker: false,
     errorTracker: false,
