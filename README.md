@@ -33,28 +33,27 @@ const tracker = new Tracker({
  * @maxSize 报告数据最大缓存量，超过该值则会自动上报
  */
 interface DefaultOptions {
-  uuid: string | undefined;
-  requestUrl: string | undefined;
-  historyTracker: boolean;
-  hashTracker: boolean;
-  errorTracker: boolean;
-  domTracker: boolean;
-  domEventsList: Set<keyof HTMLElementEventMap>;
-  performanceTracker: boolean;
-  extra: Record<string, any> | undefined;
-  sdkVersion: string | number;
-  log: boolean;
+  requestUrl: string,
+  uuid: string | undefined,
+  historyTracker: boolean,
+  hashTracker: boolean,
+  errorTracker: boolean,
+  domTracker: boolean,
+  domEventsList: Set<keyof HTMLElementEventMap>,
+  performanceTracker: boolean,
+  extra: Record<string, any> | undefined,
+  sdkVersion: string | number,
+  log: boolean,
   realTime: boolean,
-  maxSize: number
+  maxSize: number,
 }
-interface Options extends Partial<DefaultOptions> {
-  requestUrl: string;
-}
-// 默认值：
+// 必传项
+type Options = Optional<DefaultOptions, 'requestUrl'>
+// 默认值
 private initDefault(): types.DefaultOptions {
   return <types.DefaultOptions>{
     uuid: this.generateUserID(),
-    requestUrl: undefined,
+    requestUrl: "",
     historyTracker: false,
     hashTracker: false,
     errorTracker: false,
@@ -104,7 +103,7 @@ app.listen(9000, () => {
 上报数据案例：
 
 ```js
-// hash模式监听路由变化及浏览时长
+// hash模式路由变化及浏览时长
 {
   uuid: '6d6a0e19',
   time: 1701161772275,
@@ -114,67 +113,146 @@ app.listen(9000, () => {
   targetLocation: '/#b',
   duration: 42386
 }
-// dom事件
+// dom事件埋点
 {
   uuid: '6d6a0e19',
-  time: 1701161859822,
-  location: '/#adsd23',
+  time: 1701415010788,
+  location: '/',
   event: 'click',
   targetKey: 'btn',
   elementInfo: {
     name: 'button',
     id: 'd',
-    classList: [ 'a', 'b', 'c' ],
-    innerText: 'dom事件上报测试'
+    class: 'a b c'
   }
 }
-// error监听
+// jsError上报
 {
   uuid: '6d6a0e19',
-  time: 1701161928556,
-  location: '/#adsd23',
-  targetKey: 'message',
+  time: 1701415148476,
+  location: '/',
+  targetKey: 'jsError',
   event: 'error',
-  message: 'Uncaught ReferenceError: abc is not defined'
+  info: 'Uncaught Error: This is an error message'
 }
-// 性能监听
+// 资源加载失败resourceError上报
 {
   uuid: '6d6a0e19',
-  time: 1701182609591,
+  time: 1701414974549,
+  location: '/',
+  targetKey: 'resourceError',
+  event: 'error',
+  info: {
+    name: 'IMG',
+    class: 'error_img',
+    id: 'error_img',
+    url: 'https://aaabbbcccddd123456789.com/index.png'
+  }
+}
+// 首屏性能
+{
+  uuid: '6d6a0e19',
+  time: 1701415366490,
   location: '/',
   targetKey: 'performance',
   event: 'load',
   domPerformance: {
     startTime: '0.00',
-    whiteScreen: '345.30',
     load: '0.00',
-    dom: '294.80',
-    domComplete: '433.20',
-    resource: '-332.80',
-    htmlLoad: '38.00',
-    firstInteraction: '317.90',
+    dom: '1852.80',
+    domComplete: '2534.80',
+    resource: '-1888.50',
+    htmlLoad: '35.70',
+    firstInteraction: '1887.40',
     secureConnectionStart: '0.00'
   },
-  resourcePerformance: { 
-    img: [ [Object] ], 
-    js: [ [Object] ], 
-    script: [ [Object] ] 
+  resourcePerformance: {
+    script: [ [Object], [Object], [Object] ],
+    link: [ [Object] ],
+    img: [ [Object], [Object], [Object] ]
   }
 }
-// 请求和资源监听
+// 首屏后的请求和资源加载监听
 {
   uuid: '6d6a0e19',
-  time: 1701182611866,
+  time: 1701415425990,
   location: '/',
   targetKey: 'resourceLoad',
   event: 'load',
   resource: {
     name: 'https://github.githubassets.com/assets/mona-loading-dimmed-5da225352fd7.gif',
-    duration: 3.600000023841858,
-    type: 'resource'
+    duration: '126.60',
+    type: 'resource',
+    initiatorType: 'img',
+    size: 0 // 请求跨域资源等情况均为0，这个size不保证正确
   }
 }
 ```
+
+非实时统一上报时：
+
+```js
+{
+  error: [
+    {
+      uuid: '6d6a0e19',
+      time: 1701415598755,
+      location: '/',
+      targetKey: 'resourceError',
+      event: 'error',
+      info: [Object]
+    },
+    {
+      uuid: '6d6a0e19',
+      time: 1701415608466,
+      location: '/',
+      targetKey: 'jsError',
+      event: 'error',
+      info: 'Uncaught Error: This is an error message'
+    }
+  ],
+  performance: [
+    {
+      uuid: '6d6a0e19',
+      time: 1701415598905,
+      location: '/',
+      targetKey: 'performance',
+      event: 'load',
+      domPerformance: [Object],
+      resourcePerformance: [Object]
+    },
+    {
+      uuid: '6d6a0e19',
+      time: 1701415600420,
+      location: '/',
+      targetKey: 'resourceLoad',
+      event: 'load',
+      resource: [Object]
+    },
+    {
+      uuid: '6d6a0e19',
+      time: 1701415601087,
+      location: '/',
+      targetKey: 'resourceLoad',
+      event: 'load',
+      resource: [Object]
+    }
+  ],
+  dom: [
+    {
+      uuid: '6d6a0e19',
+      time: 1701415604311,
+      location: '/',
+      event: 'click',
+      targetKey: 'btn',
+      elementInfo: [Object]
+    }
+  ]
+}
+```
+
+
+
 
 
 
