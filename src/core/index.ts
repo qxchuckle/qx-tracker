@@ -1,5 +1,5 @@
 import { Report, Options, DefaultOptions } from "../types";
-import { sendBeacon, createStringSizeCalculation } from "../utils";
+import { sendBeacon, createStringSizeCalculation, log } from "../utils";
 import { TrackerOptions, LocationTracker, DomTracker, ErrorTracker, PerformanceTracker } from "./tracker";
 
 export default class Tracker extends TrackerOptions {
@@ -62,7 +62,7 @@ export default class Tracker extends TrackerOptions {
       if (this.options.maxSize && size && size > (this.options.maxSize || 10000)) {
         this.sendReport();
       }
-      console.log(size, params);
+      log && log(size, params); // 打印上报数据,方便调试
       !this.report.hasOwnProperty(key) && (this.report[key] = []);
       this.report[key].push(params);
       return true;

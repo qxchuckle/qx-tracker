@@ -2,12 +2,17 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import clear from 'rollup-plugin-clear';
 import typescript from '@rollup/plugin-typescript';
+import replace from '@rollup/plugin-replace';
 
 export default {
   input: {
     index: './src/core/index.ts',
   },
   plugins: [
+    replace({
+      preventAssignment: true,
+      __env__: JSON.stringify(process.env.ENV)
+    }),
     nodeResolve(),
     commonjs({ extensions: ['.js', '.ts'] }),
     clear({

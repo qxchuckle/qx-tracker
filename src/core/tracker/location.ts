@@ -1,6 +1,6 @@
 
 import { Options } from "../../types";
-import { TrackerCls } from "./tracker";
+import TrackerCls from "./trackerCls";
 import { createHistoryMonitoring, getLocation } from "../../utils";
 
 export default class LocationTracker extends TrackerCls {

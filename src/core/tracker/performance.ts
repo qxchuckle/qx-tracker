@@ -1,5 +1,5 @@
 import { Options, Resource } from "../../types";
-import { TrackerCls } from "./tracker";
+import TrackerCls from "./trackerCls";
 import { getDomPerformance, getResourcePerformance, listenResourceLoad } from "../../utils";
 
 export default class PerformanceTracker extends TrackerCls {

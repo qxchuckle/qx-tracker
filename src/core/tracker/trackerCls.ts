@@ -1,6 +1,6 @@
 import { Options, EventListeners } from "../../types";
 
-export abstract class TrackerCls {
+export default abstract class TrackerCls {
   protected options: Options
   protected reportTracker: Function // 上报数据的方法
   protected eventListeners: EventListeners = {}

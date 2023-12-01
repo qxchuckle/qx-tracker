@@ -1,5 +1,5 @@
 import { Options } from "../../types";
-import { TrackerCls } from "./tracker";
+import TrackerCls from "./trackerCls";
 
 export default class DomTracker extends TrackerCls {
 
