@@ -38,7 +38,8 @@ export default class ErrorTracker extends TrackerCls {
       return [{
         name: target.tagName || target.localName || target.nodeName,
         class: target.className || null,
-        url: (target as any).src || (target as any).href,
+        id: target.id || null,
+        url: (target as any).src || (target as any).href || null,
       }, "resourceError"]
     }
     if (event instanceof ErrorEvent) {

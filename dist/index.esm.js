@@ -310,8 +310,8 @@ class DomTracker extends TrackerCls {
                         targetKey,
                         elementInfo: {
                             name: target.localName ?? target.nodeName,
-                            id: target.id,
-                            classList: Array.from(target.classList),
+                            id: target.id || null,
+                            class: target.className || null,
                         }
                     }, 'dom');
                 }
@@ -355,7 +355,8 @@ class ErrorTracker extends TrackerCls {
             return [{
                     name: target.tagName || target.localName || target.nodeName,
                     class: target.className || null,
-                    url: target.src || target.href,
+                    id: target.id || null,
+                    url: target.src || target.href || null,
                 }, "resourceError"];
         }
         if (event instanceof ErrorEvent) {

@@ -35,8 +35,8 @@ export default class DomTracker extends TrackerCls {
             // 元素的基本信息，便于定位
             elementInfo: {
               name: target.localName ?? target.nodeName,
-              id: target.id,
-              classList: Array.from(target.classList),
+              id: target.id || null,
+              class: target.className || null,
               // innerText: target.innerText,
             }
           }, 'dom')
