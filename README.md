@@ -171,10 +171,10 @@ app.listen(9000, () => {
     link: [ [Object] ],
     img: [ [Object], [Object], 
       {
-        duration: "931.20"
-        initiatorType: "img"name: "https://avatars.githubusercontent.com/u/55614189?v=4"
-        size: 0
-        type: "resource"
+        duration: "931.20",
+        initiatorType: "img"name: "https://avatars.githubusercontent.com/u/55614189?v=4",
+        size: 0,
+        type: "resource",
       }
     ]
   }
