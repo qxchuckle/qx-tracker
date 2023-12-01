@@ -37,6 +37,7 @@ export default class ErrorTracker extends TrackerCls {
     if (target instanceof HTMLElement) {
       return [{
         name: target.tagName || target.localName || target.nodeName,
+        class: target.className || null,
         url: (target as any).src || (target as any).href,
       }, "resourceError"]
     }

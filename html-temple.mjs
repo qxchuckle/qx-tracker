@@ -82,7 +82,7 @@ function renderHtml(scripts, { attributes, bundle, files, publicPath, title, met
       <p></p>
       <img src="https://avatars.githubusercontent.com/u/55614189?v=4" width="100" />
       <!-- 测试资源加载错误 --> 
-      <img src="https://aaabbbcccddd123456789.com/index.png" width="100" />
+      <img src="https://aaabbbcccddd123456789.com/index.png" class="error_img" width="100" />
       <script src="https://aaabbbcccddd123456789.com/index.js"></script>
     </body>
     </html>`;
