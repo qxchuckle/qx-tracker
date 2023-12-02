@@ -5,8 +5,6 @@ export default class DomTracker extends TrackerCls {
 
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
-    this.options = options;
-    this.reportTracker = reportTracker;
   }
   public init() {
     if (this.options.domTracker) {

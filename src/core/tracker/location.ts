@@ -9,8 +9,6 @@ export default class LocationTracker extends TrackerCls {
 
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
-    this.options = options;
-    this.reportTracker = reportTracker;
     this.enterTime = new Date().getTime();
     this.location = getLocation();
   }
@@ -46,7 +44,6 @@ export default class LocationTracker extends TrackerCls {
         duration: new Date().getTime() - this.enterTime!,
         data, // 额外的数据
       }
-      // console.log(d);
       this.reportTracker(d, 'router');
       this.reLocationRecord();
     }

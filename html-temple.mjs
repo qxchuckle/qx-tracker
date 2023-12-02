@@ -19,6 +19,7 @@ window.tk = new Tracker({
   "domTracker": true,
   "errorTracker": true,
   "performanceTracker": true,
+  "navigatorTracker": true,
 })
 setTimeout(() =>{
   const imgElement = document.createElement('img');

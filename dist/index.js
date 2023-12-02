@@ -162,6 +162,60 @@
     }
     const log = createLog();
 
+    function getNavigatorInfo() {
+        const navigator = window.navigator;
+        const ua = navigator.userAgent;
+        return {
+            userAgent: ua,
+            cookieEnabled: navigator.cookieEnabled,
+            language: navigator.language,
+            browser: getBrowser(ua),
+            os: getOS(ua),
+            isMobile: isMobile(ua),
+            screen: {
+                width: window.screen.width,
+                height: window.screen.height,
+            }
+        };
+    }
+    function getBrowser(ua) {
+        ua = ua.toLowerCase();
+        const browserRegex = {
+            Edge: /edge\/([\d.]+)/i,
+            IE: /(rv:|msie\s+)([\d.]+)/i,
+            Firefox: /firefox\/([\d.]+)/i,
+            Chrome: /chrome\/([\d.]+)/i,
+            Opera: /opera\/([\d.]+)/i,
+            Safari: /version\/([\d.]+).*safari/i
+        };
+        for (const browser in browserRegex) {
+            const match = ua.match(browserRegex[browser]);
+            if (match) {
+                return { name: browser, version: match[1] };
+            }
+        }
+        return { name: "", version: "0" };
+    }
+    function getOS(ua) {
+        ua = ua.toLowerCase();
+        const osRegex = [
+            { name: "windows", regex: /compatible|windows/i },
+            { name: "macOS", regex: /macintosh|macintel/i },
+            { name: "iOS", regex: /iphone|ipad/i },
+            { name: "android", regex: /android/i },
+            { name: "linux", regex: /linux/i }
+        ];
+        for (const os of osRegex) {
+            if (ua.match(os.regex)) {
+                return os.name;
+            }
+        }
+        return "other";
+    }
+    function isMobile(ua) {
+        return !!ua.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+    }
+
     var TrackerConfig;
     (function (TrackerConfig) {
         TrackerConfig["version"] = "1.0.0";
@@ -182,6 +236,7 @@
                 domTracker: false,
                 domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
                 performanceTracker: false,
+                navigatorTracker: false,
                 extra: undefined,
                 sdkVersion: TrackerConfig.version,
                 log: true,
@@ -224,8 +279,6 @@
         location = undefined;
         constructor(options, reportTracker) {
             super(options, reportTracker);
-            this.options = options;
-            this.reportTracker = reportTracker;
             this.enterTime = new Date().getTime();
             this.location = getLocation();
         }
@@ -294,8 +347,6 @@
     class DomTracker extends TrackerCls {
         constructor(options, reportTracker) {
             super(options, reportTracker);
-            this.options = options;
-            this.reportTracker = reportTracker;
         }
         init() {
             if (this.options.domTracker) {
@@ -332,8 +383,6 @@
     class ErrorTracker extends TrackerCls {
         constructor(options, reportTracker) {
             super(options, reportTracker);
-            this.options = options;
-            this.reportTracker = reportTracker;
         }
         init() {
             if (this.options.errorTracker) {
@@ -391,8 +440,6 @@
         performanceObserver = undefined;
         constructor(options, reportTracker) {
             super(options, reportTracker);
-            this.options = options;
-            this.reportTracker = reportTracker;
         }
         init() {
             if (this.options.performanceTracker) {
@@ -434,29 +481,51 @@
         }
     }
 
+    class NavigatorTracker extends TrackerCls {
+        constructor(options, reportTracker) {
+            super(options, reportTracker);
+        }
+        init() {
+            if (this.options.navigatorTracker) {
+                this.navigatorReport();
+            }
+        }
+        additionalDestroy() { }
+        navigatorReport() {
+            this.reportTracker({
+                targetKey: 'navigator',
+                event: null,
+                info: getNavigatorInfo(),
+            }, 'navigator');
+        }
+    }
+
     class Tracker extends TrackerOptions {
         report = {};
-        locationTracker = undefined;
-        domTracker = undefined;
-        errorTracker = undefined;
-        performanceTracker = undefined;
+        trackers = {
+            locationTracker: undefined,
+            domTracker: undefined,
+            errorTracker: undefined,
+            performanceTracker: undefined,
+            navigatorTracker: undefined,
+        };
         stringSizeCalculation = undefined;
         beforeCloseHandler = undefined;
         isDestroy = false;
         constructor(options) {
             super(options);
-            this.locationTracker = new LocationTracker(this.options, (data, key) => this.reportTracker(data, key));
-            this.domTracker = new DomTracker(this.options, (data, key) => this.reportTracker(data, key));
-            this.errorTracker = new ErrorTracker(this.options, (data, key) => this.reportTracker(data, key));
-            this.performanceTracker = new PerformanceTracker(this.options, (data, key) => this.reportTracker(data, key));
+            this.trackers.locationTracker = new LocationTracker(this.options, (data, key) => this.reportTracker(data, key));
+            this.trackers.domTracker = new DomTracker(this.options, (data, key) => this.reportTracker(data, key));
+            this.trackers.errorTracker = new ErrorTracker(this.options, (data, key) => this.reportTracker(data, key));
+            this.trackers.performanceTracker = new PerformanceTracker(this.options, (data, key) => this.reportTracker(data, key));
+            this.trackers.navigatorTracker = new NavigatorTracker(this.options, (data, key) => this.reportTracker(data, key));
             this.init();
         }
         init() {
             try {
-                this.locationTracker?.init();
-                this.domTracker?.init();
-                this.errorTracker?.init();
-                this.performanceTracker?.init();
+                for (const key in this.trackers) {
+                    this.trackers[key]?.init();
+                }
                 if (!this.options.realTime) {
                     this.stringSizeCalculation = createStringSizeCalculation();
                     this.beforeCloseReport();
@@ -476,7 +545,7 @@
             return Object.assign({}, {
                 uuid: this.options.uuid,
                 time: new Date().getTime(),
-                location: this.locationTracker?.getLocation(),
+                location: this.trackers.locationTracker?.getLocation(),
                 extra: this.options.extra,
             }, data);
         }
@@ -532,15 +601,11 @@
             if (this.isDestroy)
                 return;
             this.sendReport();
-            this.locationTracker?.destroy();
-            this.domTracker?.destroy();
-            this.errorTracker?.destroy();
-            this.performanceTracker?.destroy();
+            for (const key in this.trackers) {
+                this.trackers[key]?.destroy();
+                this.trackers[key] = undefined;
+            }
             this.beforeCloseHandler && window.removeEventListener("beforeunload", this.beforeCloseHandler);
-            this.locationTracker = undefined;
-            this.domTracker = undefined;
-            this.errorTracker = undefined;
-            this.performanceTracker = undefined;
             this.stringSizeCalculation = undefined;
             this.beforeCloseHandler = undefined;
             this.isDestroy = true;

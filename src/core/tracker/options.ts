@@ -19,6 +19,7 @@ export default class TrackerOptions {
       domTracker: false,
       domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
       performanceTracker: false,
+      navigatorTracker: false,
       extra: undefined,
       sdkVersion: TrackerConfig.version,
       log: true,

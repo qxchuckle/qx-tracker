@@ -26,6 +26,7 @@ const tracker = new Tracker({
  * @domTracker 上报dom事件，需要给被监听元素加上target-key标识
  * @domEventsList 需要监听的dom事件，target-events属性给元素单独指定
  * @performanceTracker 性能监控，页面加载，资源加载等
+ * @navigatorTracker 浏览器和设备信息上报
  * @extra 需要携带的额外数据
  * @sdkVersion sdk版本
  * @log 控制台输出信息，
@@ -41,6 +42,7 @@ interface DefaultOptions {
   domTracker: boolean,
   domEventsList: Set<keyof HTMLElementEventMap>,
   performanceTracker: boolean,
+  navigatorTracker: boolean,
   extra: Record<string, any> | undefined,
   sdkVersion: string | number,
   log: boolean,
@@ -60,6 +62,7 @@ private initDefault(): types.DefaultOptions {
     domTracker: false,
     domEventsList: new Set(['click', 'dblclick', 'contextmenu', 'mousedown', 'mouseup', 'mouseout', 'mouseover']),
     performanceTracker: false,
+    navigatorTracker: false,
     extra: undefined,
     sdkVersion: types.TrackerConfig.version,
     log: true,
@@ -147,6 +150,29 @@ app.listen(9000, () => {
     class: 'error_img',
     id: 'error_img',
     url: 'https://aaabbbcccddd123456789.com/index.png'
+  }
+}
+// navigator上报
+{
+  uuid: "6d6a0e19",
+  time: 1701499676846,
+  location: "/",
+  targetKey: "navigator",
+  event: null,
+  info: {
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    cookieEnabled: true,
+    language: "zh-CN",
+    browser: {
+      name: "Chrome",
+      version: "119.0.0.0"
+    },
+    os: "windows",
+    isMobile: false,
+    screen: {
+      width: 880,
+      height: 1561
+    }
   }
 }
 // 首屏性能

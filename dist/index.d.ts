@@ -1,3 +1,10 @@
+declare class TrackerOptions {
+    protected options: Options;
+    constructor(options: Options);
+    private initDefault;
+    generateUserID(): string | undefined;
+}
+
 type Optional<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
 interface DefaultOptions {
     requestUrl: string;
@@ -8,6 +15,7 @@ interface DefaultOptions {
     domTracker: boolean;
     domEventsList: Set<keyof HTMLElementEventMap>;
     performanceTracker: boolean;
+    navigatorTracker: boolean;
     extra: Record<string, any> | undefined;
     sdkVersion: string | number;
     log: boolean;
@@ -16,19 +24,9 @@ interface DefaultOptions {
 }
 type Options = Optional<DefaultOptions, 'requestUrl'>;
 
-declare class TrackerOptions {
-    protected options: Options;
-    constructor(options: Options);
-    private initDefault;
-    generateUserID(): string | undefined;
-}
-
 declare class Tracker extends TrackerOptions {
     private report;
-    private locationTracker;
-    private domTracker;
-    private errorTracker;
-    private performanceTracker;
+    private trackers;
     private stringSizeCalculation;
     private beforeCloseHandler;
     isDestroy: boolean;

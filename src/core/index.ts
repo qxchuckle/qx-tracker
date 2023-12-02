@@ -1,13 +1,16 @@
-import { Report, Options, DefaultOptions } from "../types";
+import { Report, Options, DefaultOptions, Trackers } from "../types";
 import { sendBeacon, createStringSizeCalculation, log } from "../utils";
-import { TrackerOptions, LocationTracker, DomTracker, ErrorTracker, PerformanceTracker } from "./tracker";
+import { TrackerOptions, LocationTracker, DomTracker, ErrorTracker, PerformanceTracker, NavigatorTracker } from "./tracker";
 
 export default class Tracker extends TrackerOptions {
   private report: Report = {} // 暂存上报数据
-  private locationTracker: LocationTracker | undefined = undefined
-  private domTracker: DomTracker | undefined = undefined
-  private errorTracker: ErrorTracker | undefined = undefined
-  private performanceTracker: PerformanceTracker | undefined = undefined
+  private trackers: Trackers = {
+    locationTracker: undefined,
+    domTracker: undefined,
+    errorTracker: undefined,
+    performanceTracker: undefined,
+    navigatorTracker: undefined,
+  } // 存储各种Tracker的实例
   private stringSizeCalculation: Function | undefined = undefined
   private beforeCloseHandler: EventListenerOrEventListenerObject | undefined = undefined
   public isDestroy: boolean = false
@@ -15,19 +18,19 @@ export default class Tracker extends TrackerOptions {
   constructor(options: Options) {
     super(options);
     // 创建各种Tracker的实例，将配置和上报方法传入
-    this.locationTracker = new LocationTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
-    this.domTracker = new DomTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
-    this.errorTracker = new ErrorTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
-    this.performanceTracker = new PerformanceTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
+    this.trackers.locationTracker = new LocationTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
+    this.trackers.domTracker = new DomTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
+    this.trackers.errorTracker = new ErrorTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
+    this.trackers.performanceTracker = new PerformanceTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
+    this.trackers.navigatorTracker = new NavigatorTracker(this.options, <T>(data: T, key: string) => this.reportTracker(data, key));
     this.init();
   }
   // 初始化设置，并且初始化监听事件
   private init() {
     try {
-      this.locationTracker?.init();
-      this.domTracker?.init();
-      this.errorTracker?.init();
-      this.performanceTracker?.init();
+      for (const key in this.trackers) {
+        this.trackers[key as keyof Trackers]?.init();
+      }
       if (!this.options.realTime) {
         this.stringSizeCalculation = createStringSizeCalculation();
         this.beforeCloseReport();
@@ -48,7 +51,7 @@ export default class Tracker extends TrackerOptions {
     return Object.assign({}, {
       uuid: this.options.uuid,
       time: new Date().getTime(),
-      location: this.locationTracker?.getLocation(),
+      location: this.trackers.locationTracker?.getLocation(),
       extra: this.options.extra,
     }, data);
   }
@@ -105,15 +108,11 @@ export default class Tracker extends TrackerOptions {
     if (this.isDestroy) return;
     // 销毁前把数据传出
     this.sendReport();
-    this.locationTracker?.destroy();
-    this.domTracker?.destroy();
-    this.errorTracker?.destroy();
-    this.performanceTracker?.destroy();
+    for (const key in this.trackers) {
+      this.trackers[key as keyof Trackers]?.destroy();
+      this.trackers[key as keyof Trackers] = undefined;
+    }
     this.beforeCloseHandler && window.removeEventListener("beforeunload", this.beforeCloseHandler);
-    this.locationTracker = undefined;
-    this.domTracker = undefined;
-    this.errorTracker = undefined;
-    this.performanceTracker = undefined;
     this.stringSizeCalculation = undefined;
     this.beforeCloseHandler = undefined;
     this.isDestroy = true;

@@ -1,9 +1,11 @@
+import { LocationTracker, DomTracker, ErrorTracker, PerformanceTracker, NavigatorTracker } from "../core/tracker";
+
 /**
  * 选项生成器
  * @param T - 原始类型
  * @param K - 必填类型
  */
-type Optional<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>; 
+type Optional<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
 
 // 选项
 export interface DefaultOptions {
@@ -15,6 +17,7 @@ export interface DefaultOptions {
   domTracker: boolean,
   domEventsList: Set<keyof HTMLElementEventMap>,
   performanceTracker: boolean,
+  navigatorTracker: boolean,
   extra: Record<string, any> | undefined,
   sdkVersion: string | number,
   log: boolean,
@@ -47,3 +50,11 @@ export type InitiatorTypeLiteral = {
 export type EventListeners = {
   [eventName: string]: Array<EventListenerOrEventListenerObject>;
 };
+
+export type Trackers = {
+  locationTracker: LocationTracker | undefined,
+  domTracker: DomTracker | undefined,
+  errorTracker: ErrorTracker | undefined,
+  performanceTracker: PerformanceTracker | undefined,
+  navigatorTracker: NavigatorTracker | undefined,
+}
