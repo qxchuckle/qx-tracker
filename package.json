@@ -1,6 +1,6 @@
 {
   "name": "qx-tracker",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
