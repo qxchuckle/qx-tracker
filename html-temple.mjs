@@ -14,7 +14,7 @@ const testJS = `
 // 挂载到window上便于访问实例
 window.tk = new Tracker({
   "requestUrl": 'http://127.0.0.1:9000/tracker',
-  "historyTracker": false,
+  "historyTracker": true,
   "hashTracker": true,
   "domTracker": true,
   "errorTracker": true,

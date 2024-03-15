@@ -35,8 +35,8 @@ declare class Tracker extends TrackerOptions {
     private decorateData;
     private reportTracker;
     private beforeCloseReport;
-    setUserID<T extends DefaultOptions['uuid']>(uuid: T): void;
-    setExtra<T extends DefaultOptions['extra']>(extra: T): void;
+    setUserID<T extends DefaultOptions["uuid"]>(uuid: T): void;
+    setExtra<T extends DefaultOptions["extra"]>(extra: T): void;
     sendTracker<T>(targetKey?: string, data?: T): void;
     sendReport(): boolean;
     destroy(): void;

@@ -6,6 +6,7 @@ export default class DomTracker extends TrackerCls {
   constructor(options: Options, reportTracker: Function) {
     super(options, reportTracker);
   }
+  // 初始化
   public init() {
     if (this.options.domTracker) {
       this.domEventReport()
